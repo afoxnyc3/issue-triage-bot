@@ -1,0 +1,202 @@
+# Issue Triage Bot Configuration
+
+classification:
+  # Automatically apply labels based on classification
+  auto_label: true
+
+  # Minimum confidence score (0-1) to apply label
+  min_confidence: 0.6
+
+  # Label keywords (customize for your project)
+  labels:
+    bug:
+      - error
+      - crash
+      - broken
+      - fail
+      - exception
+      - bug
+      - traceback
+
+    feature:
+      - feature
+      - enhancement
+      - add
+      - support
+      - implement
+      - request
+
+    docs:
+      - documentation
+      - docs
+      - readme
+      - guide
+      - tutorial
+      - typo
+
+    question:
+      - how
+      - why
+      - question
+      - help
+      - confused
+      - wondering
+
+    performance:
+      - slow
+      - performance
+      - lag
+      - optimize
+      - speed
+      - memory leak
+
+    security:
+      - security
+      - vulnerability
+      - exploit
+      - CVE
+      - XSS
+      - SQL injection
+
+duplicate_detection:
+  # Enable duplicate detection
+  enabled: true
+
+  # Similarity threshold (0-1) - higher = stricter matching
+  similarity_threshold: 0.85
+
+  # Check closed issues as well
+  check_closed_issues: true
+
+  # Only check issues from last N days
+  max_age_days: 180
+
+  # Store embeddings in database for faster lookups
+  use_embedding_cache: true
+  cache_file: ".issue_embeddings.db"
+
+priority:
+  # Automatically assign priority labels
+  auto_assign: true
+
+  # P0 (Critical) keywords - production down, data loss
+  P0_keywords:
+    - production down
+    - critical
+    - security breach
+    - data loss
+    - cannot access
+    - complete outage
+
+  # P1 (High) keywords - major functionality broken
+  P1_keywords:
+    - regression
+    - blocker
+    - urgent
+    - crash
+    - breaking change
+
+  # P2 (Medium) keywords - important but not urgent
+  P2_keywords:
+    - important
+    - soon
+    - planned
+    - needed
+
+complexity:
+  # Estimate implementation complexity
+  enabled: true
+
+  # Criteria for complexity estimation
+  simple_indicators:
+    - typo
+    - docs
+    - comment
+    - small change
+
+  complex_indicators:
+    - architecture
+    - refactor
+    - database
+    - migration
+    - breaking change
+
+routing:
+  # Use CODEOWNERS file for assignee suggestions
+  use_codeowners: true
+  codeowners_file: "CODEOWNERS"
+
+  # Label-based routing (label → team/person)
+  label_routing:
+    docs: "@docs-team"
+    security: "@security-team"
+    frontend: "@frontend-team"
+    backend: "@backend-team"
+    infrastructure: "@devops-team"
+
+templates:
+  # Auto-request missing information
+  request_reproduction:
+    trigger: "bug without reproduction steps"
+    template: |
+      Thanks for reporting this issue! To help us investigate, could you please provide:
+
+      **Steps to Reproduce:**
+      1.
+      2.
+      3.
+
+      **Expected Behavior:**
+
+      **Actual Behavior:**
+
+      **Environment:**
+      - OS:
+      - Browser/Version:
+      - App Version:
+
+  request_context:
+    trigger: "missing environment details"
+    template: |
+      Could you provide more context about your environment?
+
+      - Operating System:
+      - Software Version:
+      - Configuration:
+
+auto_responses:
+  # Enable automatic responses to common issues
+  enabled: true
+
+  # File with known issues and solutions (JSON)
+  known_issues_file: "known_issues.json"
+
+  # Suggest documentation links
+  suggest_docs: true
+
+notifications:
+  # Slack notifications (optional)
+  slack:
+    enabled: false
+    webhook_url_env: "SLACK_WEBHOOK"
+    notify_on:
+      - P0_issues
+      - duplicates_found
+      - high_volume_spike
+
+reporting:
+  # Post summary comment on issues
+  post_summary: true
+
+  # Include confidence scores
+  show_confidence: false
+
+  # Summary template
+  summary_template: |
+    🤖 **Auto-Triage Summary**
+
+    - **Labels:** {labels}
+    - **Priority:** {priority}
+    - **Complexity:** {complexity}
+    {duplicates}
+    {assignee}
