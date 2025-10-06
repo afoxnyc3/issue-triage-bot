@@ -1,39 +1,64 @@
-# Issue Triage Bot - Agent Summary
+# Issue Triage Bot - Demo Summary
 
 ## **Use Case**
-Auto-triage GitHub issues with AI: classify, prioritize, detect duplicates using persistent memory.
+Auto-triage GitHub issues with AI: classify, prioritize, and route issues in 37 seconds.
+
+**Two deployment options:**
+- ⚡ **Haiku** - Fast (37s), cheap, no duplicates
+- 🧠 **Sonnet** - Slow (5min), expensive, with memory
+
+---
+
+## **Quick Comparison**
+
+| Feature | haiku-no-memory | main |
+|---------|-----------------|------|
+| **Model** | Claude Haiku 3.5 | Claude Sonnet 4.5 |
+| **Speed** | 37 seconds | 5 minutes |
+| **Cost** | ~$0.015/issue | ~$0.15/issue |
+| **Memory** | None | PostgreSQL + pgvector |
+| **Duplicates** | ❌ | ✅ |
+| **Status** | ✅ Stable | ✅ Stable |
+
+> **Note**: Haiku will get memory when [SDK bug #8999](https://github.com/anthropics/claude-code/issues/8999) fixed. See [issue #4](../../issues/4).
 
 ---
 
 ## **Tech Stack**
 
-- **Agent**: Claude Sonnet 4.5 (via Claude Code SDK)
+### Haiku Branch (Recommended)
+- **Agent**: Claude Haiku 3.5
+- **MCP**: GitHub only (Docker)
+- **Memory**: None
 - **Language**: Python 3.13 + uv
-- **Memory**: PostgreSQL (Supabase) + pgvector
-- **Automation**: GitHub Actions
 
----
-
-## **MCP Servers (2)**
-
-| Server | Tools | Purpose |
-|--------|-------|---------|
-| **GitHub MCP** | get_issue, add_labels, add_comment | GitHub API operations |
-| **PostgreSQL MCP** | execute_query, list_tables | Database read/write |
-
----
-
-## **Agent Tools (4)**
-
-1. **mcp__github** - Fetch/update issues
-2. **mcp__postgres** - Store/retrieve embeddings
-3. **Bash** - Run classification scripts
-4. **Read** - Access config files
+### Main Branch
+- **Agent**: Claude Sonnet 4.5
+- **MCP**: GitHub + PostgreSQL (npx)
+- **Memory**: Supabase + pgvector
+- **Language**: Python 3.13 + uv
 
 ---
 
 ## **Workflow**
 
+### Haiku Branch (Fast)
+```
+Issue Created
+    ↓
+GitHub Actions Trigger
+    ↓
+① Fetch Issue (GitHub MCP)
+    ↓
+② Classify (Bash + AI)
+   - Type: bug/feature/docs
+   - Priority: P0/P1/P2/P3
+    ↓
+③ Apply Labels & Comment (GitHub MCP)
+```
+**Time**: ~37 seconds
+
+### Main Branch (Full-Featured)
 ```
 Issue Created
     ↓
@@ -54,19 +79,44 @@ GitHub Actions Trigger
     ↓
 ⑤ Apply Labels & Comment (GitHub MCP)
 ```
+**Time**: ~5 minutes
+
+---
+
+## **Demo Script**
+
+### Haiku Branch Demo (37 seconds)
+1. **Show Code** - `agent.py` lines 69-83 (1 MCP server)
+2. **Run Agent** - `uv run python agent.py --issue 1`
+3. **Show Speed** - Complete in <40 seconds
+4. **GitHub Output** - Labels/comments applied
+
+### Main Branch Demo (5 minutes)
+1. **Show Code** - `agent.py` lines 69-92 (2 MCP servers)
+2. **Run Agent** - `uv run python agent.py --issue 1`
+3. **Show Memory** - Query Supabase for stored embedding
+4. **Test Duplicate** - Create similar issue, detect duplicate
+5. **GitHub Output** - Labels/comments + duplicate alert
 
 ---
 
 ## **Key Features**
 
-✅ **Persistent Memory** - PostgreSQL stores all issue embeddings
+### Haiku Branch
+✅ **Lightning Fast** - 37 seconds per issue
+✅ **Ultra Cheap** - ~$0.015 per issue
+✅ **Auto-Classification** - AI + keyword matching
+✅ **Priority Assessment** - P0-P3 impact analysis
+
+### Main Branch
+✅ **Persistent Memory** - PostgreSQL stores all embeddings
 ✅ **Duplicate Detection** - Semantic similarity via pgvector
 ✅ **Auto-Classification** - AI + keyword matching
 ✅ **Priority Assessment** - P0-P3 impact analysis
 
 ---
 
-## **Data Schema**
+## **Data Schema** (Main Branch Only)
 
 ```sql
 CREATE TABLE issue_embeddings (
@@ -82,19 +132,36 @@ CREATE TABLE issue_embeddings (
 
 ---
 
-## **Demo Script**
+## **Architecture Highlights**
 
-1. **Show Code** - `agent.py` lines 69-88 (2 MCP servers)
-2. **Run Agent** - `uv run python agent.py --issue 1`
-3. **Show Memory** - Query Supabase for stored embedding
-4. **Test Duplicate** - Create similar issue, detect duplicate
-5. **GitHub Output** - Show labels/comments applied
+### Haiku Branch
+- **Single MCP** - GitHub only (fast startup)
+- **No Database** - Stateless operation
+- **Event-Driven** - GitHub Actions automation
+
+### Main Branch
+- **Multi-MCP** - GitHub + PostgreSQL working together
+- **Vector Search** - pgvector for semantic duplicate detection
+- **Event-Driven** - GitHub Actions automation
+- **Stateful Agent** - Shared persistent memory
 
 ---
 
-## **Architecture Highlights**
+## **Choose Your Branch**
 
-- **Multi-MCP** - 2 different protocols working together
-- **Vector Search** - pgvector for semantic analysis
-- **Event-Driven** - Automated via GitHub Actions
-- **Stateless Agent** - Uses shared persistent memory
+**Use `haiku-no-memory` if:**
+- Speed is priority (8x faster)
+- Cost matters (90% cheaper)
+- Duplicate detection not critical
+- Want simplest setup (no database)
+
+**Use `main` if:**
+- Duplicate prevention crucial
+- High-quality repo with many issues
+- Can afford slower/more expensive
+- Need persistent issue history
+
+---
+
+**Repo**: https://github.com/afoxnyc3/issue-triage-bot
+**Branches**: `main` (Sonnet+memory) | `haiku-no-memory` (fast)
