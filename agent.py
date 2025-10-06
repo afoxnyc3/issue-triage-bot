@@ -65,8 +65,8 @@ async def triage_issue(
     owner = owner or os.getenv("GITHUB_OWNER", "your-org")
     repo = repo or os.getenv("GITHUB_REPO", "your-repo")
 
-    # GitHub MCP server configuration
-    github_mcp = {
+    # MCP server configurations
+    mcp_servers = {
         "github": {
             "command": "docker",
             "args": [
@@ -77,42 +77,70 @@ async def triage_issue(
             "env": {
                 "GITHUB_PERSONAL_ACCESS_TOKEN": os.getenv("GITHUB_TOKEN")
             }
+        },
+        "postgres": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "mcp-postgres-full-access",
+                os.getenv("DATABASE_URL")
+            ]
         }
     }
 
     # System prompt for the triage agent
-    system_prompt = """You are an Issue Triage Bot for GitHub repositories.
+    system_prompt = """You are an Issue Triage Bot with PERSISTENT MEMORY for GitHub repositories.
 
 Your responsibilities:
 1. Analyze issue content (title and body)
-2. Classify and label issues (bug, feature, docs, question, etc.)
-3. Detect duplicate issues by comparing to existing issues
-4. Assess priority (P0-critical, P1-high, P2-medium, P3-low)
-5. Estimate complexity (simple, medium, complex)
-6. Suggest appropriate assignees based on code ownership
-7. Request missing information if needed
+2. **CHECK MEMORY FIRST**: Search PostgreSQL database for similar past issues
+3. Classify and label issues (bug, feature, docs, question, etc.)
+4. Detect duplicates using semantic similarity (>85% = duplicate)
+5. Assess priority (P0-critical, P1-high, P2-medium, P3-low)
+6. Estimate complexity (simple, medium, complex)
+7. **STORE IN MEMORY**: Save issue embeddings to PostgreSQL for future searches
+8. Suggest appropriate assignees based on code ownership
+9. Request missing information if needed
 
-You have access to custom Python scripts via the Bash tool:
+You have access to TWO MCP servers:
+- **GitHub MCP**: Fetch/label issues, post comments, read CODEOWNERS
+- **PostgreSQL MCP**: Store/retrieve issue embeddings (PERSISTENT MEMORY)
+  - Table: issue_embeddings (issue_number, title, body, embedding, labels)
+  - Function: find_similar_issues(embedding, threshold, max_results)
+
+You also have access to Python scripts via Bash:
 - scripts/issue_classifier.py: Classify issue into categories
-- scripts/duplicate_detector.py: Find similar existing issues
-- scripts/priority_assessor.py: Assign priority level
-- scripts/assignee_router.py: Suggest best assignee
+- scripts/memory_manager.py: Generate embeddings for storage
 
-Always provide clear, actionable recommendations."""
+IMPORTANT WORKFLOW:
+1. Fetch issue from GitHub MCP
+2. Search memory: query_database("SELECT * FROM find_similar_issues(...)")
+3. If duplicates found (similarity > 0.85): Flag and comment
+4. Classify and assess priority
+5. Store in memory: insert_into_database("INSERT INTO issue_embeddings...")
+6. Apply labels and post summary
+
+Always leverage memory to provide context-aware triage!"""
 
     # Build query based on whether issue_number provided
     if issue_number:
-        prompt = f"""Triage issue #{issue_number} in {owner}/{repo}.
+        prompt = f"""Triage issue #{issue_number} in {owner}/{repo} using PERSISTENT MEMORY.
 
 Steps:
 1. Fetch the issue details using GitHub MCP
-2. Run classification script to determine labels
-3. Check for duplicate issues
+2. **CHECK MEMORY**: Query PostgreSQL for similar past issues (use find_similar_issues function)
+3. Run classification script to determine labels
 4. Assess priority level
-5. Suggest assignee if applicable
-6. Apply labels and post a summary comment
+5. If duplicates found (>85% similarity): Flag in comment
+6. **STORE IN MEMORY**: Insert issue embedding into PostgreSQL database
+7. Suggest assignee if applicable
+8. Apply labels and post a summary comment (mention if duplicate was found in memory)
 
-Provide a structured summary of your analysis."""
+Provide a structured summary showing:
+- Labels applied
+- Priority assigned
+- Memory check results (duplicates found or not)
+- Whether this issue was stored in memory"""
     else:
         # No specific issue - provide usage example
         prompt = """I'm the Issue Triage Bot, ready to analyze GitHub issues.
@@ -127,11 +155,12 @@ Example: triage_issue(issue_number=123, owner='acme', repo='app')"""
     options = ClaudeCodeOptions(
         model="claude-sonnet-4-20250514",
         allowed_tools=[
-            "mcp__github",  # GitHub API access
-            "Bash",         # Run classification scripts
-            "Read",         # Read configuration files
+            "mcp__github",    # GitHub API access
+            "mcp__postgres",  # PostgreSQL database (MEMORY)
+            "Bash",           # Run classification scripts
+            "Read",           # Read configuration files
         ],
-        mcp_servers=github_mcp,
+        mcp_servers=mcp_servers,
         system_prompt=system_prompt,
         cwd=os.path.dirname(os.path.abspath(__file__)),
     )
@@ -142,7 +171,7 @@ Example: triage_issue(issue_number=123, owner='acme', repo='app')"""
     try:
         async with ClaudeSDKClient(options=options) as agent:
             await agent.query(prompt=prompt)
-            async for msg in messages:
+            async for msg in agent.receive_response():
                 messages.append(msg)
 
                 if asyncio.iscoroutinefunction(activity_handler):
