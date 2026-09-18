@@ -4,8 +4,8 @@ Updated: 2026-09-18. Durable goal active; no milestone is yet complete.
 
 ## Current milestone / checkpoint
 
-M1 deterministic policy, security gate, snapshot and ownership reconciliation pass
-local acceptance. M0 live gate remains pending; M2/M3 not started; M4 deferred.
+M1 deterministic GitHub client passes mocked acceptance. Policy, security gate,
+snapshot and ownership reconciliation are committed. M0 live gate remains pending; M2/M3 not started; M4 deferred.
 
 ## Completed checkpoints
 
@@ -40,29 +40,41 @@ local acceptance. M0 live gate remains pending; M2/M3 not started; M4 deferred.
   explicit safety/recovery paths. Dry-run and shadow must perform zero GitHub writes
   (to be enforced in apply). No live rollout authorization is implied by these defaults.
 
-Files: src/issue_triage_bot/{models,config,gate,policy}.py, triage/policy.yml,
-.github/triage-control.yml, tests/unit/test_policy.py, EXECUTION_STATUS.md.
+## GitHub client checkpoint
+
+- 70d4758: policy/gate/snapshot and signed ownership reconciliation (110 tests).
+- Current: bounded authenticated REST reads, strict normalization, full comment and
+  label-timeline pagination, default-head/immutable-ref release file reads, scoped
+  related search, read-only default and explicit guard before each mutation.
+- Read retries classify 429/5xx/secondary limits with bounded delay; mutations are
+  never blindly retried after uncertain responses. Apply must rediscover signed
+  pending state and reconcile before retrying a write.
+- Short pages honor validated next links; external/jumping links fail closed. Label
+  segments are encoded including `.`/`..`; unrelated issue comment edits are rejected.
+- Raw API error bodies are never propagated; duplicate JSON fields are rejected.
+
+Files: src/issue_triage_bot/{codec,github}.py, tests/unit/test_github.py,
+EXECUTION_STATUS.md.
 
 ## Verification
 
-- Foundation: locked sync and 49 tests on Python 3.11.15/3.12.12 passed; pinned CI
-  statically checked, not run on GitHub.
-- Signed state targeted suite: 37 adversarial/healthy tests passed.
-- Policy/gate targeted suite: 23 tests initially passed; regression added for
-  pending intents incorrectly acquiring legacy ownership (24 policy tests total).
-- `uv run --locked pytest -q`: all 110 tests pass on Python 3.12.12.
-- Ruff lint/format, strict mypy (8 source files), `git diff --check`: pass.
-- Review: no GitHub mutations, model calls, real credentials, unrelated edits or
-  sensitive output; type labels require explicit policy mode and allowlist; removals
-  need recorded ownership, policy/retirement membership and bot timeline evidence.
+- GitHub targeted suite: 29 tests pass using HTTPX MockTransport; no network/token
+  used by tests. Includes missing/invalid identities, pagination, failure after page
+  one, read retries, write-guard rejection, lost response without duplicate POST,
+  wrong comment target, release reads, query injection and path/redirect fencing.
+- `uv run --locked pytest -q`: all 139 tests pass on Python 3.12.12.
+- Ruff lint/format, strict mypy (9 source files), `git diff --check`: pass.
+- Foundation tests also previously passed on Python 3.11.15. New client has not been
+  exercised live; no integration/milestone acceptance is inferred from mocks.
+- Diff review confirms no actual credentials, broad API writer, model SDK or remote
+  mutation. Public REST/HTTPX primary docs informed endpoint and mock behavior.
 
 ## Exact next checkpoint
 
-M1 deterministic GitHub client: read-only data fetches, complete pagination, strict
-issue/comment/timeline normalization, bounded retry classification, contents/default
-branch release reads, related-candidate verification and guarded write capabilities.
-Use HTTP mocks/fault injection; no live writes. Then implement apply state machine,
-CLI and remaining M0/M2 workflow boundaries. Continue credential-free checkpoints.
+M1 apply state machine: fresh release/control/issue fences before every write,
+comment-first pending intent, explicit ownership, label-by-label reconciliation,
+read-back/finalization and resume after every uncertain boundary. Dry-run/shadow
+must never mutate. Add fault-injection tests, then CLI and M0/M2 workflow wiring.
 
 ## Owner actions / remaining acceptance
 

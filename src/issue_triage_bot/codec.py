@@ -39,13 +39,21 @@ def _reject_constant(value: str) -> object:
     raise BoundaryError("nonfinite JSON number")
 
 
-def parse_json(model: type[Model], raw: bytes, *, max_bytes: int = MAX_PROPOSAL_BYTES) -> Model:
+def decode_json(raw: bytes, *, max_bytes: int = MAX_PROPOSAL_BYTES) -> object:
     if len(raw) > max_bytes:
         raise BoundaryError("input exceeds size limit")
     try:
-        parsed = json.loads(
+        result: object = json.loads(
             raw.decode("utf-8"), object_pairs_hook=_unique_object, parse_constant=_reject_constant
         )
+        return result
+    except (ValueError, RecursionError, UnicodeError):
+        raise BoundaryError("invalid structured input") from None
+
+
+def parse_json(model: type[Model], raw: bytes, *, max_bytes: int = MAX_PROPOSAL_BYTES) -> Model:
+    parsed = decode_json(raw, max_bytes=max_bytes)
+    try:
         # JSON mode allows JSON enum strings/arrays, but never numeric/bool coercion.
         return model.model_validate_json(canonical_json(parsed), strict=True)
     except (ValueError, ValidationError, RecursionError, UnicodeError):
