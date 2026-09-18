@@ -133,3 +133,67 @@ class ProposalEnvelope(RunContext):
         ):
             raise ValueError("invalid candidate set")
         return self
+
+
+class CommentState(StrictModel):
+    state_version: Literal[1]
+    state: Literal["pending", "final"]
+    outcome: Literal["applied", "review_sensitive", "review_transient", "transient", "deferred"]
+    retry_eligible: bool
+    attempts: Annotated[int, Field(ge=0, le=3)]
+    written_at: Annotated[str, Field(pattern=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")]
+    applied_at: str | None = None
+    envelope: ProposalEnvelope
+    decision: TriageDecision | None
+    decision_hash: Digest
+    intended_labels: Annotated[tuple[Label, ...], Field(max_length=32)] = ()
+    managed_labels: Annotated[tuple[Label, ...], Field(max_length=32)] = ()
+    previous_managed_labels: Annotated[tuple[Label, ...], Field(max_length=32)] = ()
+
+    @field_validator("state_version", mode="before")
+    @classmethod
+    def integer_version(cls, value: object) -> object:
+        if type(value) is not int:
+            raise ValueError("state_version must be an integer")
+        return value
+
+    @field_validator("written_at", "applied_at")
+    @classmethod
+    def utc_timestamp(cls, value: str | None) -> str | None:
+        from datetime import datetime
+
+        if value is not None:
+            parsed = datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+            if parsed.strftime("%Y-%m-%dT%H:%M:%SZ") != value:
+                raise ValueError("invalid UTC timestamp")
+        return value
+
+    @model_validator(mode="after")
+    def coherent_state(self) -> Self:
+        if self.retry_eligible != (self.outcome in {"transient", "deferred"}):
+            raise ValueError("inconsistent retry eligibility")
+        if self.outcome == "transient" and not 1 <= self.attempts < 3:
+            raise ValueError("invalid transient attempt count")
+        if self.outcome == "review_transient" and self.attempts != 3:
+            raise ValueError("invalid exhausted attempt count")
+        if self.outcome == "applied" and self.decision is None:
+            raise ValueError("missing applied decision")
+        if (self.state == "final") != (self.applied_at is not None):
+            raise ValueError("inconsistent final timestamp")
+        for labels in (self.intended_labels, self.managed_labels, self.previous_managed_labels):
+            if len(labels) != len(set(labels)):
+                raise ValueError("duplicate state label")
+        return self
+
+
+class SignedState(StrictModel):
+    key_id: Annotated[str, Field(pattern=r"^[a-zA-Z0-9_-]{1,40}$")]
+    payload: CommentState
+    signature: Digest
+
+
+class Comment(StrictModel):
+    id: PositiveID
+    author_login: str
+    author_type: str
+    body: str

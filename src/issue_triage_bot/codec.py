@@ -67,11 +67,11 @@ def content_hash(issue: Issue, release: Release) -> str:
     )
 
 
-def decision_hash(decision: TriageDecision, envelope: ProposalEnvelope) -> str:
+def decision_hash(decision: TriageDecision | None, envelope: ProposalEnvelope) -> str:
     return digest_bytes(
         canonical_json(
             {
-                "decision": decision.model_dump(mode="json"),
+                "decision": decision.model_dump(mode="json") if decision else None,
                 "envelope": envelope.model_dump(mode="json"),
             }
         )

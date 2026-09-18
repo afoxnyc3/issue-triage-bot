@@ -4,8 +4,8 @@ Updated: 2026-09-18. Durable goal active; no milestone is yet complete.
 
 ## Current milestone / checkpoint
 
-M1 credential-free foundation: strict trust-boundary models, hashing, locked tooling
-and disabled legacy workflow pass local acceptance. M0 live gate remains pending.
+M1 signed comment-state codec and safe rendering pass local acceptance. Strict
+trust-boundary models, hashing, locked tooling and disabled legacy workflow are committed. M0 live gate remains pending.
 M2/M3 have not started; M4 is optional/deferred.
 
 ## Completed checkpoints
@@ -15,7 +15,7 @@ M2/M3 have not started; M4 is optional/deferred.
 - 899fdc2: traced SDK/CLI transport. Initial owner-review stop was premature; an
   argument representation failure is not a failed live M0 check. Candidate `--tools=`
   preserves the explicit empty value. No tools/runtime acceptance is claimed.
-- Current checkpoint: strict frozen issue/decision/envelope/release/run models;
+- be62161: strict frozen issue/decision/envelope/release/run models;
   bounded JSON rejects unknown/duplicate fields, coercions and nonfinite numbers;
   complete content and all release/model metadata participate in hashes/fences;
   stale content and cross-issue/run/attempt proposals rejected.
@@ -26,35 +26,40 @@ M2/M3 have not started; M4 is optional/deferred.
 - Read-only CI pins checkout/setup-uv and runs locked installs, Ruff, mypy and pytest
   on Python 3.11/3.12. CI definition is statically tested, not yet run on GitHub.
 
-## Current checkpoint files
+## Signed-state checkpoint
 
-.github/workflows/{triage,ci}.yml, .gitignore, pyproject.toml, uv.lock,
-src/issue_triage_bot/{__init__,models,codec}.py,
-tests/conftest.py, tests/unit/{test_models,test_workflows}.py, EXECUTION_STATUS.md.
+HMAC-SHA256 over canonical key-ID/payload data; current/previous-key rotation;
+bounded signed state; author/type/repository/issue/node authentication; malformed,
+unsigned, duplicate and unknown-version state fails closed. Discovery considers
+all supplied comments and ignores foreign-author markers. Rendering bounds model
+fields, strips HTML/link/image markup and neutralizes mentions/issue autolinks.
+Related references are deliberately not rendered until later GitHub verification.
+
+Files: src/issue_triage_bot/{models,codec,comment,sanitize}.py,
+tests/unit/test_comment.py, EXECUTION_STATUS.md.
 
 ## Verification
 
-- `uv sync --locked --group dev`: passes.
-- `uv run --locked pytest tests/unit/test_models.py -q`: 47 pass.
-- `uv run --locked pytest -q`: 49 pass on Python 3.12.12.
-- Isolated locked Python 3.11.15 environment: same 49 tests pass.
+- Foundation checkpoint: locked sync, 49 tests on Python 3.11.15 and 3.12.12,
+  Ruff formatting/lint and strict mypy passed; read-only pinned CI statically tested.
+- Signed-state targeted tests: 37 pass (forgery, signatures, key rotation/retirement,
+  author spoofing, identity replay, duplicate/version markers, all-comment discovery,
+  size bounds, invalid state transitions/timestamps and hostile rendering).
+- `uv run --locked pytest -q`: all 86 tests pass on Python 3.12.12.
 - `uv run --locked ruff check src tests`: passes.
-- `uv run --locked ruff format --check src tests`: passes before final commit.
-- `uv run --locked mypy`: passes (3 application source files).
-- `git diff --check`: passes.
-- Initial tests caught JSON tuple validation being disrupted by a pre-validator;
-  moved Unicode validation after field parsing and verified valid and hostile cases.
-- Reviewed changed code for untrusted rendering/logging and credentials: no writes,
-  model calls, secret reads or untrusted error payloads in this foundation slice.
-- Action parser diagnostic remains a deliberately failing representation probe;
-  docs/m0/{REVIEW.md,parser-contract-result.json,transport-review.json} preserve scope.
+- `uv run --locked ruff format --check src tests`: passes before commit.
+- `uv run --locked mypy`: passes (5 application files).
+- `git diff --check`: passes. Keys in tests are ephemeral random values; no real
+  secrets, model calls, remote writes or raw issue content were accessed/logged.
+- No live milestone acceptance is inferred from these local tests.
 
 ## Exact next checkpoint
 
-M1 signed comment-state codec: HMAC-SHA256, key IDs/current+previous rotation,
-author/repository/issue/node binding, safe rendering and forged/duplicate marker
-rejection. Add adversarial tests before policy/reconciliation/client work. Continue
-unblocked credential-free checkpoints; never mark M0 passed without live evidence.
+M1 deterministic policy/security gate: strict YAML policy/control configuration,
+full-content security scan, advisory priority, bounded UTF-8 snapshot, mapping and
+signed-state/timeline label ownership reconciliation tests. Then GitHub client,
+apply state machine, CLI and fault-injection checkpoints. M0 harness/live checklist
+remains required; foundations may continue without credentials.
 
 ## Owner actions / remaining acceptance
 
