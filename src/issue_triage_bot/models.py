@@ -147,6 +147,8 @@ class CommentState(StrictModel):
     decision: TriageDecision | None
     decision_hash: Digest
     intended_labels: Annotated[tuple[Label, ...], Field(max_length=32)] = ()
+    # Only labels absent when intent was written may establish new ownership on resume.
+    pending_additions: Annotated[tuple[Label, ...], Field(max_length=32)] = ()
     managed_labels: Annotated[tuple[Label, ...], Field(max_length=32)] = ()
     previous_managed_labels: Annotated[tuple[Label, ...], Field(max_length=32)] = ()
 
@@ -180,7 +182,16 @@ class CommentState(StrictModel):
             raise ValueError("missing applied decision")
         if (self.state == "final") != (self.applied_at is not None):
             raise ValueError("inconsistent final timestamp")
-        for labels in (self.intended_labels, self.managed_labels, self.previous_managed_labels):
+        if not {label.casefold() for label in self.pending_additions}.issubset(
+            {label.casefold() for label in self.intended_labels}
+        ):
+            raise ValueError("pending additions must belong to intent")
+        for labels in (
+            self.intended_labels,
+            self.pending_additions,
+            self.managed_labels,
+            self.previous_managed_labels,
+        ):
             if len(labels) != len(set(labels)):
                 raise ValueError("duplicate state label")
         return self

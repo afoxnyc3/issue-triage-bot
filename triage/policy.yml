@@ -1,0 +1,23 @@
+rollout: dry_run
+snapshot_bytes: 8192
+label_allowlist: [bug, enhancement, documentation, question, chore]
+type_labels:
+  bug: [bug]
+  feature: [enhancement]
+  documentation: [documentation]
+  question: [question]
+  chore: [chore]
+retired_labels: []
+areas: {}
+excluded_actors: []
+security_terms:
+  - security
+  - vulnerability
+  - exploit
+  - cve-
+  - xss
+  - sql injection
+  - remote code execution
+  - credential leak
+  - authentication bypass
+  - privilege escalation

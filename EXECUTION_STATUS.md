@@ -4,9 +4,8 @@ Updated: 2026-09-18. Durable goal active; no milestone is yet complete.
 
 ## Current milestone / checkpoint
 
-M1 signed comment-state codec and safe rendering pass local acceptance. Strict
-trust-boundary models, hashing, locked tooling and disabled legacy workflow are committed. M0 live gate remains pending.
-M2/M3 have not started; M4 is optional/deferred.
+M1 deterministic policy, security gate, snapshot and ownership reconciliation pass
+local acceptance. M0 live gate remains pending; M2/M3 not started; M4 deferred.
 
 ## Completed checkpoints
 
@@ -26,40 +25,44 @@ M2/M3 have not started; M4 is optional/deferred.
 - Read-only CI pins checkout/setup-uv and runs locked installs, Ruff, mypy and pytest
   on Python 3.11/3.12. CI definition is statically tested, not yet run on GitHub.
 
-## Signed-state checkpoint
+## Latest completed/checkpoint work
 
-HMAC-SHA256 over canonical key-ID/payload data; current/previous-key rotation;
-bounded signed state; author/type/repository/issue/node authentication; malformed,
-unsigned, duplicate and unknown-version state fails closed. Discovery considers
-all supplied comments and ignores foreign-author markers. Rendering bounds model
-fields, strips HTML/link/image markup and neutralizes mentions/issue autolinks.
-Related references are deliberately not rendered until later GitHub verification.
+- 88c1dd1: signed state/key rotation, author/identity verification, fail-closed marker
+  discovery and sanitized rendering (86 tests at that revision).
+- Current checkpoint: strict YAML policy/control parsing with duplicate keys and
+  aliases rejected; committed disabled/dry-run defaults; full-content security gate,
+  shared UTF-8 snapshot bound, type mapping/allowlist, sensitive and retry outcomes,
+  no automatic priority labels, timeline-backed signed ownership reconciliation.
+- Recovery ownership now uses pending_additions separately from intended_labels.
+  This preserves unowned legacy labels even when a pending intent names them.
+- Configuration interpretation: comment_only suppresses model type-label writes;
+  deterministic review/retry/deferred control labels remain permitted by the plan's
+  explicit safety/recovery paths. Dry-run and shadow must perform zero GitHub writes
+  (to be enforced in apply). No live rollout authorization is implied by these defaults.
 
-Files: src/issue_triage_bot/{models,codec,comment,sanitize}.py,
-tests/unit/test_comment.py, EXECUTION_STATUS.md.
+Files: src/issue_triage_bot/{models,config,gate,policy}.py, triage/policy.yml,
+.github/triage-control.yml, tests/unit/test_policy.py, EXECUTION_STATUS.md.
 
 ## Verification
 
-- Foundation checkpoint: locked sync, 49 tests on Python 3.11.15 and 3.12.12,
-  Ruff formatting/lint and strict mypy passed; read-only pinned CI statically tested.
-- Signed-state targeted tests: 37 pass (forgery, signatures, key rotation/retirement,
-  author spoofing, identity replay, duplicate/version markers, all-comment discovery,
-  size bounds, invalid state transitions/timestamps and hostile rendering).
-- `uv run --locked pytest -q`: all 86 tests pass on Python 3.12.12.
-- `uv run --locked ruff check src tests`: passes.
-- `uv run --locked ruff format --check src tests`: passes before commit.
-- `uv run --locked mypy`: passes (5 application files).
-- `git diff --check`: passes. Keys in tests are ephemeral random values; no real
-  secrets, model calls, remote writes or raw issue content were accessed/logged.
-- No live milestone acceptance is inferred from these local tests.
+- Foundation: locked sync and 49 tests on Python 3.11.15/3.12.12 passed; pinned CI
+  statically checked, not run on GitHub.
+- Signed state targeted suite: 37 adversarial/healthy tests passed.
+- Policy/gate targeted suite: 23 tests initially passed; regression added for
+  pending intents incorrectly acquiring legacy ownership (24 policy tests total).
+- `uv run --locked pytest -q`: all 110 tests pass on Python 3.12.12.
+- Ruff lint/format, strict mypy (8 source files), `git diff --check`: pass.
+- Review: no GitHub mutations, model calls, real credentials, unrelated edits or
+  sensitive output; type labels require explicit policy mode and allowlist; removals
+  need recorded ownership, policy/retirement membership and bot timeline evidence.
 
 ## Exact next checkpoint
 
-M1 deterministic policy/security gate: strict YAML policy/control configuration,
-full-content security scan, advisory priority, bounded UTF-8 snapshot, mapping and
-signed-state/timeline label ownership reconciliation tests. Then GitHub client,
-apply state machine, CLI and fault-injection checkpoints. M0 harness/live checklist
-remains required; foundations may continue without credentials.
+M1 deterministic GitHub client: read-only data fetches, complete pagination, strict
+issue/comment/timeline normalization, bounded retry classification, contents/default
+branch release reads, related-candidate verification and guarded write capabilities.
+Use HTTP mocks/fault injection; no live writes. Then implement apply state machine,
+CLI and remaining M0/M2 workflow boundaries. Continue credential-free checkpoints.
 
 ## Owner actions / remaining acceptance
 

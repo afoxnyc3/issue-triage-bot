@@ -1,0 +1,5 @@
+# Keep disabled until live M0, evaluation and owner-approved rollout gates pass.
+enabled: false
+policy_generation: 1
+daily_inference_limit: 40
+canary: null
