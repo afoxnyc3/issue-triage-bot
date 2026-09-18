@@ -1,11 +1,12 @@
-name: Issue Triage Bot
+name: Legacy Issue Triage Bot (disabled)
 
 on:
-  issues:
-    types: [opened, edited]
+  workflow_dispatch:
 
 jobs:
   triage:
+    # Retained for cutover history; never run privileged legacy inference.
+    if: ${{ false }}
     runs-on: ubuntu-latest
 
     steps:

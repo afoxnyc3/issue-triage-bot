@@ -1,0 +1,29 @@
+name: Deterministic triage CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        python: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+        with:
+          version: '0.11.1'
+          python-version: ${{ matrix.python }}
+          enable-cache: false
+      - run: uv sync --locked --group dev
+      - run: uv run --locked ruff check src tests
+      - run: uv run --locked ruff format --check src tests
+      - run: uv run --locked mypy
+      - run: uv run --locked pytest
+      - run: git diff --check
