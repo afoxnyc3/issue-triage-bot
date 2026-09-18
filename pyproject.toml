@@ -6,6 +6,9 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["pydantic>=2.12,<3", "httpx>=0.28,<1", "pyyaml>=6,<7", "typer>=0.20,<1"]
 
+[project.scripts]
+triage = "issue_triage_bot.cli:app"
+
 [dependency-groups]
 dev = ["pytest>=8,<10", "ruff>=0.12,<1", "mypy>=1.18,<2", "types-PyYAML>=6,<7"]
 

@@ -313,3 +313,49 @@ def test_dot_segment_label_is_encoded_without_path_traversal():
 def test_duplicate_api_json_keys_fail_closed():
     with pytest.raises(BoundaryError):
         client(lambda _: httpx.Response(200, content=b'{"number":12,"number":13}')).issue(12)
+
+
+def test_issue_inspection_is_bounded_and_skips_pull_requests():
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        assert request.url.params["state"] == "all"
+        assert request.url.params["direction"] == "asc"
+        return httpx.Response(
+            200,
+            json=[
+                issue_data(number=1, pull_request={}),
+                issue_data(number=2),
+                issue_data(number=3),
+                issue_data(number=4),
+            ],
+        )
+
+    assert client(handler).issue_numbers(2) == (2, 3)
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize("foreign", [True, False])
+def test_issue_inspection_rejects_foreign_or_duplicate_results(foreign):
+    rows = [issue_data(), issue_data(repository_url="foreign") if foreign else issue_data()]
+    with pytest.raises(BoundaryError):
+        client(lambda _: httpx.Response(200, json=rows)).issue_numbers()
+
+
+def test_issue_listing_next_link_preserves_query():
+    def handler(request):
+        page = int(request.url.params["page"])
+        headers = (
+            {
+                "Link": (
+                    "<https://api.github.com/repos/example/repo/issues?state=all&sort=created"
+                    '&direction=asc&per_page=100&page=2>; rel="next"'
+                )
+            }
+            if page == 1
+            else {}
+        )
+        return httpx.Response(200, json=[issue_data(number=page)], headers=headers)
+
+    assert client(handler).issue_numbers() == (1, 2)

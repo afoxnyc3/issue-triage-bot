@@ -47,6 +47,9 @@ class ApplyRecord(StrictModel):
     context: RunContext
     envelope: ProposalEnvelope | None = None
     decision_hash: Digest | None = None
+    intended_outcome: (
+        Literal["applied", "review_sensitive", "review_transient", "transient", "deferred"] | None
+    ) = None
     status: Literal[
         "applied",
         "review_sensitive",
@@ -151,6 +154,7 @@ class Apply:
         *,
         envelope: ProposalEnvelope | None = None,
         state: CommentState | None = None,
+        intent: Intent | None = None,
         after: tuple[str, ...] | None = None,
     ) -> ApplyRecord:
         assert self._context is not None
@@ -158,7 +162,14 @@ class Apply:
             {
                 "context": self._context,
                 "envelope": envelope,
-                "decision_hash": state.decision_hash if state else None,
+                "decision_hash": (
+                    state.decision_hash
+                    if state
+                    else decision_hash(intent.decision, envelope)
+                    if intent and envelope
+                    else None
+                ),
+                "intended_outcome": state.outcome if state else intent.outcome if intent else None,
                 "status": status,
                 "before_labels": before[:100] if before is not None else None,
                 "after_labels": after[:100] if after is not None else None,
@@ -321,16 +332,24 @@ class Apply:
             )
             if dry_run or live.policy.rollout in {"dry_run", "shadow"}:
                 self._operations = [
+                    Operation(
+                        name="create_comment" if found.comment_id is None else "edit_comment",
+                        result="planned",
+                    )
+                ]
+                self._operations += [
                     Operation(name="add_label", label=label, result="planned") for label in plan.add
                 ]
                 self._operations += [
                     Operation(name="remove_label", label=label, result="planned")
                     for label in plan.remove
                 ]
+                self._operations.append(Operation(name="edit_comment", result="planned"))
                 return self._record(
                     "shadow" if live.policy.rollout == "shadow" else "dry_run",
                     before,
                     envelope=accepted,
+                    intent=intent,
                     after=before,
                 )
             previous_owned = (

@@ -164,13 +164,19 @@ class GitHub:
             )
         raise AssertionError("unreachable request loop")
 
-    def _pages(self, path: str) -> Iterator[dict[str, object]]:
+    def _pages(
+        self, path: str, params: dict[str, str | int] | None = None
+    ) -> Iterator[dict[str, object]]:
         # Construct page URLs locally. Never follow attacker-controlled Link hosts.
+        base_params = params or {}
         for page in range(1, 1001):
             headers: dict[str, str] = {}
             items = array(
                 self._request(
-                    "GET", path, params={"per_page": 100, "page": page}, headers_out=headers
+                    "GET",
+                    path,
+                    params=base_params | {"per_page": 100, "page": page},
+                    headers_out=headers,
                 )
             )
             next_link = httpx.Response(200, headers=headers).links.get("next", {}).get("url")
@@ -185,7 +191,11 @@ class GitHub:
                     or url.path != path
                     or url.params.get("page") != str(page + 1)
                     or url.params.get("per_page", "100") != "100"
-                    or set(url.params) - {"page", "per_page"}
+                    or set(url.params) - {"page", "per_page"} - base_params.keys()
+                    or any(
+                        url.params.get(key, str(value)) != str(value)
+                        for key, value in base_params.items()
+                    )
                 ):
                     raise BoundaryError("invalid GitHub pagination link")
             if len(items) > 100:
@@ -271,6 +281,25 @@ class GitHub:
                 raise BoundaryError("inconsistent timeline pagination")
             seen.add(event.id)
             result.append(event)
+        return tuple(result)
+
+    def issue_numbers(self, limit: int = 51) -> tuple[int, ...]:
+        if not 1 <= limit <= 501:
+            raise BoundaryError("invalid issue inspection limit")
+        result: list[int] = []
+        for item in self._pages(
+            self._prefix + "/issues", {"state": "all", "sort": "created", "direction": "asc"}
+        ):
+            if "pull_request" in item:
+                continue
+            if item.get("repository_url") != API + self._prefix:
+                raise BoundaryError("issue listing repository mismatch")
+            number = positive_id(item.get("number"))
+            if number in result:
+                raise BoundaryError("inconsistent issue listing pagination")
+            result.append(number)
+            if len(result) == limit:
+                break
         return tuple(result)
 
     def labels(self) -> tuple[str, ...]:

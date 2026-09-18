@@ -27,52 +27,39 @@ write or M0 inference has run; live M1 acceptance remains pending. M0 live gate 
 
 ## Latest completed/checkpoint work
 
-- 70d4758: deterministic policy/gates/snapshots and explicit label ownership.
-- 06610ab: bounded GitHub client, complete pagination, guarded mutations (139 tests).
-- 6be3e38: coherent live release loading, prompt/schema/inference identity (157 tests).
-- Current: comment-first signed pending state, mutation-by-mutation reconciliation,
-  timeline and live release/content rechecks at each write, read-back/finalization,
-  same-content pending resume and edited-content abandonment/cleanup. Uncertain
-  writes leave discoverable state; no blind mutation retry occurs.
-- Human overrides during durable reservation are rechecked before mutation. Fresh
-  review_only routing overrides earlier pending classification. Sensitive model
-  outcomes win over bad related references; only verified related links are rendered.
-- Replays/unchanged final outcomes skip. Exhausted retries cannot restart through
-  a deferred run. Explicit operator force_decision is available for fixture/manual
-  reclassification, but does not bypass release, content, sensitive or rollout gates.
-- Dry-run/shadow never mutate. Canary label writes require a reservation callback;
-  absent/denied accounting leaves signed pending state. The durable implementation
-  of that callback is still required before runtime type-label integration.
-- Invalid/duplicate/unsupported signed state produces invalid_state audit with no
-  guessed ownership or writes. Repair and health integration must surface it for
-  human review (not yet implemented).
-- Bounded audit records contain only accepted envelope, hashes, operation results,
-  label sets and timestamps. Unknown after-label state is null, not falsely empty.
+- 04ea950: signed comment-first apply state machine and crash recovery (196 tests).
+- Current M1 CLI checkpoint: installed `triage apply/check/setup-labels/repair` entry
+  point; default dry-run, explicit workflow-context-bound apply writes, concrete
+  per-write guards, bounded inputs and redacted errors/audits. No OAuth access.
+- Dry-run reports include planned comment/label operations, decision hash and intended
+  outcome. Label setup fences the full live release before each creation. Repair
+  performs bounded read-only enumeration, excluding pull requests and rejecting
+  foreign/duplicate issues; unreadable authenticated state is surfaced for review.
+- Shared in-memory gateway moved to tests/fakes.py for CLI/integration verification.
+  Operator contracts and runtime environment are documented in docs/CLI.md.
 
-Files: src/issue_triage_bot/{apply,comment,models}.py,
-tests/integration/test_apply.py, EXECUTION_STATUS.md.
+Files: pyproject.toml, src/issue_triage_bot/{cli,apply,github}.py,
+tests/{__init__,fakes}.py, tests/unit/{test_cli,test_github}.py,
+tests/integration/test_apply.py, docs/CLI.md, EXECUTION_STATUS.md.
 
 ## Verification
 
-- Apply integration/fault-injection suite: 39 tests pass; real live-release loader,
-  strict schemas, signing, policy and rendering operate against an in-memory GitHub
-  gateway. Failures injected after all initial and edit write boundaries, including
-  successful create/finalize with a lost response.
-- Covered kill switch before labels/finalization/after reservation, policy/prompt/
-  generation/content drift, forged states, human override races, sensitive outcomes,
-  retry exhaustion, all nonwriting modes, canary denial/cohort and safe related links.
-- `uv run --locked pytest -q`: all 196 tests pass on Python 3.12.12.
-- Ruff lint/format, strict mypy (11 source files), `git diff --check`: pass.
-- No remote CI/run/write acceptance is claimed. No real credentials or inference
-  were used. Remaining actual network TOCTOU is bounded by immediate per-write
-  refetches; GitHub does not offer atomic compare-and-swap label mutations.
+- Targeted CLI/GitHub tests: 44 pass, including default nonwriting behavior, explicit
+  guarded comment-only writes, workflow mismatch, key redaction, repair enumeration,
+  pagination and prompt drift between label creations.
+- Full suite: 211 tests pass on Python 3.12.12. Ruff format/lint, strict mypy
+  (12 source files) and git diff --check pass. No live credentials, model, GitHub
+  writes or remote CI used.
+- Apply canary mutations still require a durable reservation adapter. Repair remains
+  inspection only. Early CLI failures can precede audit creation; workflow fallback
+  audit handling is still needed. No model-dependent acceptance is claimed.
 
 ## Exact next checkpoint
 
-M1 CLI: triage apply/check/setup-labels/repair with dry-run safety, strict workflow
-context, redacted errors/audits and explicit runtime secret loading (never run with
-real secrets in this task). Connect the concrete client's guard to Apply.guard.
-Then preflight/retry/admission accounting, M0 harness and M2 workflow wiring.
+Return to the earliest incomplete gate: implement and locally verify the M0 harness
+and its redacted evidence validator. Keep it disabled pending owner publishing and
+personal Max authentication/billing attestation. Then continue preflight/admission
+and M2 workflow integration as allowed by M0 results.
 
 ## Owner actions / remaining acceptance
 
