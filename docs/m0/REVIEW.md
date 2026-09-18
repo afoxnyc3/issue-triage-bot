@@ -1,4 +1,4 @@
-# M0 source review — architectural review required
+# M0 source review — transport finding; live gate pending
 
 Date: 2026-09-18. No OAuth token was accessed and no inference was run.
 
@@ -24,11 +24,27 @@ misattribution. A bare flag may have CLI-specific semantics; those semantics hav
 not been established for the resolved runtime. No live checklist item passes on
 this evidence. Do not claim the action is exploitable from this check alone.
 
-The execution prompt says: “If a check fails, do not weaken the control merely to
-pass. Record the evidence and stop for architectural review.” Work stops at that
-review boundary rather than introducing an unverified secret-bearing workflow.
-Credential-free M1 work is permitted by the plan, but the explicit failed-M0 stop
-condition takes precedence here.
+## Follow-up source review
+
+The initial stop was premature: argument representation alone is not a failed live
+M0 check. Credential-free analysis can resolve this without owner access. The
+pinned SDK 0.3.277 emits a bare `--tools` for a null extraArgs value; the packaged
+CLI declares `--tools <tools...>` with a required value. A candidate spelling
+`--tools=` survives the action parser as the key `tools=` with a null value, and
+therefore reaches the CLI as `--tools=` (an explicit empty value). MCP denial,
+strict MCP configuration and an empty MCP server map survive independently.
+This does not change the empty-tool requirement or enable another provider/tool.
+
+Evidence came from public npm packages `@anthropic-ai/claude-agent-sdk@0.3.277`
+and `@anthropic-ai/claude-agent-sdk-darwin-arm64@0.3.277`; only source/embedded
+source was inspected. No SDK query or Claude executable was run. Exact package
+integrity and source hashes are recorded in transport-review.json.
+
+The alternative is a **candidate for the live harness**, not a passed isolation
+check. Keep the original failing representation probe as regression evidence.
+Proceed with credential-free M1 foundations under the approved amendment; require
+all original live checks before accepting model-dependent integration. A genuine
+live failure must still stop for architectural review.
 
 ## Reproduce without credentials
 
@@ -58,7 +74,7 @@ A missing argument or a changed parser exits 2. Exit 0 means the contract passes
 The checker intentionally fails for this upstream revision; it is not an application
 CI test and must not be silently inverted to authorize inference.
 
-## Review decision needed
+## Remaining runtime review
 
 Choose a reviewed way to establish an empty effective tool inventory before enabling
 OAuth inference. Options to investigate include a corrected upstream parser/revision
@@ -88,7 +104,7 @@ This inspection strategy is still to be implemented and tested after review.
 
 ## Exact owner-operated sequence after review
 
-1. Resolve the tool-isolation review; resume Codex to implement/review the harness.
+1. Complete the credential-free harness and validate the candidate flag transport.
 2. Separately authorize publishing the reviewed harness when ready (no push in this task).
 3. Outside Codex, open Claude Code and use `/status` to confirm personal Max identity.
 4. Outside Codex, run `claude setup-token` and store the result directly as the GitHub

@@ -4,9 +4,9 @@ Updated: 2026-09-18. Durable goal exists in the active Codex task; objective inc
 
 ## Current milestone / checkpoint
 
-M0: source-level isolation precheck failed; awaiting architectural review under the
-execution prompt's explicit failed-check stop rule. See docs/m0/REVIEW.md.
-No M0 live checklist item has passed. M1–M3 have not started; M4 is optional/deferred.
+M0: live gate pending. Follow-up static review found a candidate explicit-empty
+flag spelling without weakening isolation. Initial owner-review stop was premature;
+no live check had failed. Credential-free M1 foundations may proceed. M4 is optional.
 
 ## Completed work
 
@@ -42,20 +42,20 @@ No M0 live checklist item has passed. M1–M3 have not started; M4 is optional/d
 - Initial Bun install failed on sandbox temp-directory access; retried successfully
   with TMPDIR/cache under /private/tmp. No permission weakening was required.
 
-## Owner actions / exact next checkpoint
+## Follow-up verification and next checkpoint
 
-Architectural review of the failed argument-preservation check is required before a
-secret-bearing harness. Investigate a corrected reviewed action revision or the
-current documented deny-all syntax, preserving empty-inventory acceptance. No fork,
-broader permissions, API billing or alternate runtime was substituted. After review,
-implement/test the credential-free M0 harness, then obtain owner authorization to
-publish/run it. Owner alone confirms personal Max identity, creates/stores OAuth
-outside Codex, and verifies subscription attribution and rotation behavior.
-
-The goal remains active because the durable-goal blocked status requires the same
-blocker across three consecutive goal turns. This is the first blocked observation;
-do not mark complete or fabricate live evidence. On continuation, check for owner
-review direction before dependent implementation and honor the failed-M0 stop rule.
+- Reviewed public SDK 0.3.277 source and embedded CLI option declaration without
+  executing Claude or accessing credentials. SDK turns null into a bare flag;
+  CLI declares a required tools value. Candidate `--tools=` survives transport as
+  explicit empty; static result and package integrity recorded in transport-review.json.
+- Original probe still detects loss of the quoted empty value; no test was weakened.
+- Previous turn classification: progress (committed plan and reproducible evidence).
+  This turn resolves an unnecessarily broad stop; the representation check does
+  not constitute a live M0 failure. There is no owner-only blocker to foundations.
+- Exact next checkpoint: disable legacy workflow locally, establish locked Python
+  dependencies, strict issue/decision/envelope models, hashing and adversarial tests.
+- Owner-only M0 identity, token generation/storage, usage attribution and publish/run
+  authorization remain pending. No runtime isolation or live acceptance is claimed.
 
 ## Preservation / risks
 

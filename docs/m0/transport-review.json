@@ -1,0 +1,30 @@
+{
+  "scope": "static transport review only; no CLI execution or live inference",
+  "packages": [
+    {
+      "name": "@anthropic-ai/claude-agent-sdk",
+      "version": "0.3.277",
+      "integrity": "sha512-HJxa5sQBy6Gn3WOcR5O0zQ+9JQ/BlkaeQsPPzSjAUZZrgtvbv67UrMDVZuiei/cmjgaCxY6VYG5YNwRLp8bwzg=="
+    },
+    {
+      "name": "@anthropic-ai/claude-agent-sdk-darwin-arm64",
+      "version": "0.3.277",
+      "integrity": "sha512-HgQZ1p4hkdBEhQFvsivaqdo4ZjsDNppLn0akPQHJAdW4xEpzYQKHhHiOYhfzT20MLkvO9cuDk1lS5yGt5eyLzA=="
+    }
+  ],
+  "sdk_sha256": "5117c812937166f74cfe96ad48dd8236be8afd78586e8e4360fd1fe9a9ac7a35",
+  "cli_binary_sha256": "73d6a2a55c46907e49bd8bb7608e134333bd71173351ee16ddce7d7db9914b9c",
+  "candidate_args": "--tools= --disallowedTools \"mcp__*\" --strict-mcp-config --mcp-config '{\"mcpServers\":{}}'",
+  "action_extra_args": {
+    "tools=": null,
+    "strict-mcp-config": null,
+    "mcp-config": "{\"mcpServers\":{}}"
+  },
+  "sdk_transport_argv": [
+    "--tools=",
+    "--strict-mcp-config",
+    "--mcp-config",
+    "{\"mcpServers\":{}}"
+  ],
+  "live_tool_inventory_verified": false
+}
