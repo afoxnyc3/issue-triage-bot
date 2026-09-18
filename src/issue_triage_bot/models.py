@@ -178,8 +178,11 @@ class CommentState(StrictModel):
             raise ValueError("invalid transient attempt count")
         if self.outcome == "review_transient" and self.attempts != 3:
             raise ValueError("invalid exhausted attempt count")
-        if self.outcome == "applied" and self.decision is None:
-            raise ValueError("missing applied decision")
+        if self.outcome == "applied":
+            if self.decision is None:
+                raise ValueError("missing applied decision")
+            if self.decision.kind == IssueKind.SECURITY or self.decision.priority == "P0":
+                raise ValueError("sensitive decisions cannot be applied")
         if (self.state == "final") != (self.applied_at is not None):
             raise ValueError("inconsistent final timestamp")
         if not {label.casefold() for label in self.pending_additions}.issubset(

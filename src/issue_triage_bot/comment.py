@@ -128,7 +128,13 @@ def discover_state(comments: Iterable[Comment], issue: Issue, keys: KeyRing) -> 
         return Discovery(unreadable=True)
 
 
-def render_comment(state: CommentState, keys: KeyRing, *, area_name: str | None = None) -> str:
+def render_comment(
+    state: CommentState,
+    keys: KeyRing,
+    *,
+    area_name: str | None = None,
+    verified_related: tuple[tuple[int, str], ...] = (),
+) -> str:
     descriptions = {
         "applied": "Triage proposal validated.",
         "review_sensitive": "This report needs human review. Automatic classification is withheld.",
@@ -153,7 +159,11 @@ def render_comment(state: CommentState, keys: KeyRing, *, area_name: str | None 
         if decision.missing_information:
             lines.extend(["", "Requested information:"])
             lines.extend(f"- {sanitize(item, limit=120)}" for item in decision.missing_information)
-        # Related references are added by apply only after independent GitHub verification.
+        if verified_related:
+            lines.extend(["", "Possibly related:"])
+            for number, reason in verified_related:
+                url = f"https://github.com/{state.envelope.repository}/issues/{number}"
+                lines.append(f"- [Issue {number}]({url}): {sanitize(reason, limit=120)}")
     lines.extend(["", state_marker(state, keys)])
     body = "\n".join(lines)
     if len(body.encode("utf-8")) > MAX_COMMENT_BYTES:

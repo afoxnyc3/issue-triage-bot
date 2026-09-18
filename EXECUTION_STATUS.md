@@ -4,8 +4,8 @@ Updated: 2026-09-18. Durable goal active; no milestone is yet complete.
 
 ## Current milestone / checkpoint
 
-M1 live release loader passes local acceptance. GitHub client, policy, security
-gate, snapshot and ownership reconciliation are committed. M0 live gate remains pending; M2/M3 not started; M4 deferred.
+M1 apply state machine passes local fault-injection acceptance. No real GitHub
+write or M0 inference has run; live M1 acceptance remains pending. M0 live gate remains pending; M2/M3 not started; M4 deferred.
 
 ## Completed checkpoints
 
@@ -27,55 +27,52 @@ gate, snapshot and ownership reconciliation are committed. M0 live gate remains 
 
 ## Latest completed/checkpoint work
 
-- 88c1dd1: signed state/key rotation, author/identity verification, fail-closed marker
-  discovery and sanitized rendering (86 tests at that revision).
-- Current checkpoint: strict YAML policy/control parsing with duplicate keys and
-  aliases rejected; committed disabled/dry-run defaults; full-content security gate,
-  shared UTF-8 snapshot bound, type mapping/allowlist, sensitive and retry outcomes,
-  no automatic priority labels, timeline-backed signed ownership reconciliation.
-- Recovery ownership now uses pending_additions separately from intended_labels.
-  This preserves unowned legacy labels even when a pending intent names them.
-- Configuration interpretation: comment_only suppresses model type-label writes;
-  deterministic review/retry/deferred control labels remain permitted by the plan's
-  explicit safety/recovery paths. Dry-run and shadow must perform zero GitHub writes
-  (to be enforced in apply). No live rollout authorization is implied by these defaults.
-
-## Latest completed/checkpoint work
-
 - 70d4758: deterministic policy/gates/snapshots and explicit label ownership.
-- 06610ab: bounded GitHub client with complete pagination, guarded writes, scoped
-  reads, safe retries and lost-response handling (139 tests at that revision).
-- Current checkpoint: live default-head release loader; control/policy/prompt and
-  inference fetched at one immutable commit; all raw file digests plus generation,
-  provider/model/action/schema/config identity bound together. Missing/disabled
-  control exits before inference configuration or policy reads.
-- Committed prompt v1, exported strict decision schema and candidate Sonnet 4.6
-  configuration. Official model-ID documentation identifies claude-sonnet-4-6 as a
-  fixed identifier, not an evergreen alias. Personal Max availability and isolation
-  remain live M0 checks; no model invocation occurred.
-- Type-label mode requires a canary in this first release contract. Removing the
-  cap after reviewed M3 evidence remains an explicit future rollout checkpoint.
+- 06610ab: bounded GitHub client, complete pagination, guarded mutations (139 tests).
+- 6be3e38: coherent live release loading, prompt/schema/inference identity (157 tests).
+- Current: comment-first signed pending state, mutation-by-mutation reconciliation,
+  timeline and live release/content rechecks at each write, read-back/finalization,
+  same-content pending resume and edited-content abandonment/cleanup. Uncertain
+  writes leave discoverable state; no blind mutation retry occurs.
+- Human overrides during durable reservation are rechecked before mutation. Fresh
+  review_only routing overrides earlier pending classification. Sensitive model
+  outcomes win over bad related references; only verified related links are rendered.
+- Replays/unchanged final outcomes skip. Exhausted retries cannot restart through
+  a deferred run. Explicit operator force_decision is available for fixture/manual
+  reclassification, but does not bypass release, content, sensitive or rollout gates.
+- Dry-run/shadow never mutate. Canary label writes require a reservation callback;
+  absent/denied accounting leaves signed pending state. The durable implementation
+  of that callback is still required before runtime type-label integration.
+- Invalid/duplicate/unsupported signed state produces invalid_state audit with no
+  guessed ownership or writes. Repair and health integration must surface it for
+  human review (not yet implemented).
+- Bounded audit records contain only accepted envelope, hashes, operation results,
+  label sets and timestamps. Unknown after-label state is null, not falsely empty.
 
-Files: src/issue_triage_bot/{config,release}.py, triage/{PROMPT.md,inference.yml,schema.json},
-tests/unit/test_release.py, EXECUTION_STATUS.md.
+Files: src/issue_triage_bot/{apply,comment,models}.py,
+tests/integration/test_apply.py, EXECUTION_STATUS.md.
 
 ## Verification
 
-- Release loader: 18 tests cover coherent commit reads, missing/disabled control,
-  missing release files, digest changes without generation bumps, schema drift,
-  canary requirement and rejected weakened/coerced inference flags.
-- `uv run --locked pytest -q`: all 157 tests pass on Python 3.12.12.
-- Ruff lint/format, strict mypy (10 source files), `git diff --check`: pass.
-- Read-only pinned CI is defined but has not run remotely. No live/inference/write
-  acceptance is inferred from the local suite.
+- Apply integration/fault-injection suite: 39 tests pass; real live-release loader,
+  strict schemas, signing, policy and rendering operate against an in-memory GitHub
+  gateway. Failures injected after all initial and edit write boundaries, including
+  successful create/finalize with a lost response.
+- Covered kill switch before labels/finalization/after reservation, policy/prompt/
+  generation/content drift, forged states, human override races, sensitive outcomes,
+  retry exhaustion, all nonwriting modes, canary denial/cohort and safe related links.
+- `uv run --locked pytest -q`: all 196 tests pass on Python 3.12.12.
+- Ruff lint/format, strict mypy (11 source files), `git diff --check`: pass.
+- No remote CI/run/write acceptance is claimed. No real credentials or inference
+  were used. Remaining actual network TOCTOU is bounded by immediate per-write
+  refetches; GitHub does not offer atomic compare-and-swap label mutations.
 
 ## Exact next checkpoint
 
-M1 apply state machine: invoke fresh release/control/issue fences immediately before
-EVERY write, persist signed pending intent before labels, reconcile/read back/finalize,
-resume uncertain boundaries, and emit bounded redacted outcome records. Dry-run and
-shadow must never write. Add fault injection with the full live-release loader.
-Then CLI and remaining M0/M2 workflow/privacy/budget boundaries.
+M1 CLI: triage apply/check/setup-labels/repair with dry-run safety, strict workflow
+context, redacted errors/audits and explicit runtime secret loading (never run with
+real secrets in this task). Connect the concrete client's guard to Apply.guard.
+Then preflight/retry/admission accounting, M0 harness and M2 workflow wiring.
 
 ## Owner actions / remaining acceptance
 
