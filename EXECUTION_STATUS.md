@@ -4,8 +4,8 @@ Updated: 2026-09-18. Durable goal active; no milestone is yet complete.
 
 ## Current milestone / checkpoint
 
-M1 deterministic GitHub client passes mocked acceptance. Policy, security gate,
-snapshot and ownership reconciliation are committed. M0 live gate remains pending; M2/M3 not started; M4 deferred.
+M1 live release loader passes local acceptance. GitHub client, policy, security
+gate, snapshot and ownership reconciliation are committed. M0 live gate remains pending; M2/M3 not started; M4 deferred.
 
 ## Completed checkpoints
 
@@ -40,41 +40,42 @@ snapshot and ownership reconciliation are committed. M0 live gate remains pendin
   explicit safety/recovery paths. Dry-run and shadow must perform zero GitHub writes
   (to be enforced in apply). No live rollout authorization is implied by these defaults.
 
-## GitHub client checkpoint
+## Latest completed/checkpoint work
 
-- 70d4758: policy/gate/snapshot and signed ownership reconciliation (110 tests).
-- Current: bounded authenticated REST reads, strict normalization, full comment and
-  label-timeline pagination, default-head/immutable-ref release file reads, scoped
-  related search, read-only default and explicit guard before each mutation.
-- Read retries classify 429/5xx/secondary limits with bounded delay; mutations are
-  never blindly retried after uncertain responses. Apply must rediscover signed
-  pending state and reconcile before retrying a write.
-- Short pages honor validated next links; external/jumping links fail closed. Label
-  segments are encoded including `.`/`..`; unrelated issue comment edits are rejected.
-- Raw API error bodies are never propagated; duplicate JSON fields are rejected.
+- 70d4758: deterministic policy/gates/snapshots and explicit label ownership.
+- 06610ab: bounded GitHub client with complete pagination, guarded writes, scoped
+  reads, safe retries and lost-response handling (139 tests at that revision).
+- Current checkpoint: live default-head release loader; control/policy/prompt and
+  inference fetched at one immutable commit; all raw file digests plus generation,
+  provider/model/action/schema/config identity bound together. Missing/disabled
+  control exits before inference configuration or policy reads.
+- Committed prompt v1, exported strict decision schema and candidate Sonnet 4.6
+  configuration. Official model-ID documentation identifies claude-sonnet-4-6 as a
+  fixed identifier, not an evergreen alias. Personal Max availability and isolation
+  remain live M0 checks; no model invocation occurred.
+- Type-label mode requires a canary in this first release contract. Removing the
+  cap after reviewed M3 evidence remains an explicit future rollout checkpoint.
 
-Files: src/issue_triage_bot/{codec,github}.py, tests/unit/test_github.py,
-EXECUTION_STATUS.md.
+Files: src/issue_triage_bot/{config,release}.py, triage/{PROMPT.md,inference.yml,schema.json},
+tests/unit/test_release.py, EXECUTION_STATUS.md.
 
 ## Verification
 
-- GitHub targeted suite: 29 tests pass using HTTPX MockTransport; no network/token
-  used by tests. Includes missing/invalid identities, pagination, failure after page
-  one, read retries, write-guard rejection, lost response without duplicate POST,
-  wrong comment target, release reads, query injection and path/redirect fencing.
-- `uv run --locked pytest -q`: all 139 tests pass on Python 3.12.12.
-- Ruff lint/format, strict mypy (9 source files), `git diff --check`: pass.
-- Foundation tests also previously passed on Python 3.11.15. New client has not been
-  exercised live; no integration/milestone acceptance is inferred from mocks.
-- Diff review confirms no actual credentials, broad API writer, model SDK or remote
-  mutation. Public REST/HTTPX primary docs informed endpoint and mock behavior.
+- Release loader: 18 tests cover coherent commit reads, missing/disabled control,
+  missing release files, digest changes without generation bumps, schema drift,
+  canary requirement and rejected weakened/coerced inference flags.
+- `uv run --locked pytest -q`: all 157 tests pass on Python 3.12.12.
+- Ruff lint/format, strict mypy (10 source files), `git diff --check`: pass.
+- Read-only pinned CI is defined but has not run remotely. No live/inference/write
+  acceptance is inferred from the local suite.
 
 ## Exact next checkpoint
 
-M1 apply state machine: fresh release/control/issue fences before every write,
-comment-first pending intent, explicit ownership, label-by-label reconciliation,
-read-back/finalization and resume after every uncertain boundary. Dry-run/shadow
-must never mutate. Add fault-injection tests, then CLI and M0/M2 workflow wiring.
+M1 apply state machine: invoke fresh release/control/issue fences immediately before
+EVERY write, persist signed pending intent before labels, reconcile/read back/finalize,
+resume uncertain boundaries, and emit bounded redacted outcome records. Dry-run and
+shadow must never write. Add fault injection with the full live-release loader.
+Then CLI and remaining M0/M2 workflow/privacy/budget boundaries.
 
 ## Owner actions / remaining acceptance
 

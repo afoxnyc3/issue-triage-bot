@@ -4,7 +4,7 @@ import re
 from typing import Annotated, Literal, Self
 
 import yaml
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from yaml.tokens import AliasToken
 
 from .codec import BoundaryError, Model, canonical_json, parse_json
@@ -43,9 +43,13 @@ class Policy(StrictModel):
             raise ValueError("security cannot have automatic type labels")
         all_labels = set(self.label_allowlist) | set(self.retired_labels)
         all_labels.update(label for labels in self.type_labels.values() for label in labels)
-        if any(PRIORITY_LABEL.match(label) for label in all_labels):
+        if any(PRIORITY_LABEL.match(label.strip()) for label in all_labels):
             raise ValueError("priority labels are not supported")
-        if any(label in CONTROL_LABELS for labels in self.type_labels.values() for label in labels):
+        if any(
+            label.casefold() in CONTROL_LABELS
+            for labels in self.type_labels.values()
+            for label in labels
+        ):
             raise ValueError("control labels cannot be type mappings")
         if any(not term.strip() or len(term) > 80 for term in self.security_terms):
             raise ValueError("invalid security term")
@@ -82,3 +86,37 @@ def parse_yaml(model: type[Model], raw: bytes) -> Model:
         return parse_json(model, canonical_json(data), max_bytes=64 * 1024)
     except (yaml.YAMLError, ValueError, TypeError, RecursionError):
         raise BoundaryError("invalid configuration") from None
+
+
+class Inference(StrictModel):
+    provider: Literal["anthropic"]
+    model: Annotated[str, Field(min_length=1, max_length=100, pattern=r"^[a-zA-Z0-9._:-]+$")]
+    action_sha: Annotated[str, Field(pattern=r"^[0-9a-f]{40}$")]
+    schema_version: Literal[1]
+    decision_schema_digest: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+    max_turns: Literal[2] = 2
+    tools_argument: Literal["--tools="] = "--tools="
+    disallowed_tools: Literal["mcp__*"] = "mcp__*"
+    strict_mcp_config: Literal[True] = True
+    timeout_minutes: Literal[10] = 10
+
+    @field_validator("schema_version", "max_turns", "timeout_minutes", mode="before")
+    @classmethod
+    def integer_constants(cls, value: object) -> object:
+        if type(value) is not int:
+            raise ValueError("expected integer configuration")
+        return value
+
+    @field_validator("strict_mcp_config", mode="before")
+    @classmethod
+    def boolean_constant(cls, value: object) -> object:
+        if type(value) is not bool:
+            raise ValueError("expected boolean configuration")
+        return value
+
+    @model_validator(mode="after")
+    def pinned_model(self) -> Self:
+        from .models import Release
+
+        Release.exact_model_required(self.model)
+        return self

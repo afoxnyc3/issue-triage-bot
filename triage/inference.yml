@@ -1,0 +1,11 @@
+# Candidate configuration; M0 live acceptance is still required.
+provider: anthropic
+model: claude-sonnet-4-6
+action_sha: 4036a180cf690f49529f5d8c79c998855287f590
+schema_version: 1
+max_turns: 2
+tools_argument: --tools=
+disallowed_tools: mcp__*
+strict_mcp_config: true
+timeout_minutes: 10
+decision_schema_digest: fcbcd2f212cfebfb2cd8505aaae05609882582750762eb0492f2f64d55be1034

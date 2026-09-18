@@ -115,3 +115,11 @@ This inspection strategy is still to be implemented and tested after review.
 No runnable M0 workflow has been installed. The legacy workflow remains unchanged
 locally and remotely; disable/make it manual-only at the first implementation
 checkpoint before validating the replacement. Legacy deletion waits for cutover.
+
+## Candidate model configuration
+
+`triage/inference.yml` selects `claude-sonnet-4-6`. Anthropic's
+[model ID documentation](https://platform.claude.com/docs/en/about-claude/models/model-ids-and-versions)
+identifies this generation's dateless ID as a fixed model ID, not an evergreen alias.
+This is configuration provenance only; personal Max availability and attribution
+remain unverified until the live M0 checklist passes.
