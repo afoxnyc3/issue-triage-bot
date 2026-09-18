@@ -103,16 +103,17 @@ The local inspection strategy is implemented and mock-tested; live evidence rema
 ## Exact owner-operated sequence after review
 
 1. Complete the credential-free harness and validate the candidate flag transport.
-2. Separately authorize publishing the reviewed harness when ready (no push in this task).
+2. Publishing was approved and completed on 2026-09-18; the protected environment is
+   configured and TRIAGE_M0_ENABLED remains false. See RUNBOOK.md for remaining steps.
 3. Outside Codex, open Claude Code and use `/status` to confirm personal Max identity.
 4. Outside Codex, run `claude setup-token` and store the result directly as the GitHub
    repository secret `CLAUDE_CODE_OAUTH_TOKEN`. Never paste it into Codex or a file.
 5. Run the approved live harness with a non-collaborator test issue and supply only
    the redacted run/checklist evidence and billing/rotation attestations.
 
-The M0 workflow is now committed locally with a default-off one-fixture gate. The
-legacy workflow is manual-only and hard-disabled locally; its remote copy is unchanged
-until publishing. Legacy deletion still waits for accepted replacement cutover.
+The M0 workflow is now published with its one-fixture gate disabled. The legacy
+workflow is manual-only and hard-disabled on main. Legacy deletion still waits for
+accepted replacement cutover.
 
 ## Candidate model configuration
 

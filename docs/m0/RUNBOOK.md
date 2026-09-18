@@ -2,8 +2,9 @@
 
 The harness is `.github/workflows/triage-m0.yml`. It is inert unless repository
 variable `TRIAGE_M0_ENABLED` equals `true` and the opened issue number matches
-`TRIAGE_M0_ISSUE_NUMBER`. Nothing has been published or run with real credentials.
-The local legacy workflow is disabled; its remote copy is unchanged until publishing.
+`TRIAGE_M0_ISSUE_NUMBER`. The owner approved publishing on 2026-09-18; the harness and disabled legacy workflow
+are now on main. No live OAuth inference has run. The triage-m0 environment requires
+afoxnyc3 review, prevents self-review and permits only main; TRIAGE_M0_ENABLED is false.
 M0 success does not enable production triage or authorize type-label rollout.
 
 ## What the reviewed harness does
@@ -51,11 +52,10 @@ Evidence intentionally says `m0_passed: false`: it cannot establish owner-only c
 
 ## Exact owner sequence (outside Codex)
 
-1. Review the committed harness and authorize publishing it. Codex has not pushed.
-   Keep `.github/triage-control.yml` disabled and the legacy workflow disabled.
-2. Create the `triage-m0` GitHub environment with a required owner reviewer and limit
-   deployment branches to the reviewed default branch. Confirm no unrelated environment
-   secrets are inherited by this harness. Leave `TRIAGE_M0_ENABLED` unset/false for now.
+1. Publication was approved and completed on 2026-09-18. Keep `.github/triage-control.yml` disabled and the legacy workflow disabled.
+2. The `triage-m0` environment is configured with owner review and main-only deployment.
+   No environment secrets were added. Keep `TRIAGE_M0_ENABLED=false` until the
+   authentication and fixture coordination steps below are complete.
 3. Open Claude Code locally and use `/status` to confirm the personal Max identity,
    not the Team workspace. Run `claude setup-token` outside Codex and store its result
    directly as repository secret `CLAUDE_CODE_OAUTH_TOKEN`. Never paste it into Codex,

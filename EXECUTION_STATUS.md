@@ -1,11 +1,11 @@
 # Execution status
 
-Updated: 2026-09-18. Durable goal active; no milestone is yet complete.
+Updated: 2026-09-18. Owner approved publication; live M0 acceptance remains blocked.
 
 ## Current milestone / checkpoint
 
-M1 apply state machine passes local fault-injection acceptance. No real GitHub
-write or M0 inference has run; live M1 acceptance remains pending. M0 live gate remains pending; M2/M3 not started; M4 deferred.
+M1 apply state machine passes local fault-injection acceptance. No issue mutation or M0 inference has run; live M1 acceptance remains pending.
+Owner-approved publication and protected-environment configuration are complete. M0 live gate remains pending; M2/M3 not started; M4 deferred.
 
 ## Completed checkpoints
 
@@ -18,12 +18,12 @@ write or M0 inference has run; live M1 acceptance remains pending. M0 live gate 
   bounded JSON rejects unknown/duplicate fields, coercions and nonfinite numbers;
   complete content and all release/model metadata participate in hashes/fences;
   stale content and cross-issue/run/attempt proposals rejected.
-- Legacy workflow now manual-trigger-only AND job-disabled locally. Legacy source,
-  classifier, memory and migration remain untouched. Remote workflow unchanged.
+- Legacy workflow now manual-trigger-only AND job-disabled locally and on main. Legacy source,
+  classifier, memory and migration remain untouched.
 - Replaced project dependencies with deterministic application dependencies; uv.lock
   is committed with this checkpoint. Legacy SDK is no longer in the active environment.
 - Read-only CI pins checkout/setup-uv and runs locked installs, Ruff, mypy and pytest
-  on Python 3.11/3.12. CI definition is statically tested, not yet run on GitHub.
+  on Python 3.11/3.12. Both jobs passed on GitHub run 35395096666 at 5b46739.
 
 ## Latest completed/checkpoint work
 
@@ -39,7 +39,7 @@ write or M0 inference has run; live M1 acceptance remains pending. M0 live gate 
   Build artifact contains trusted code/locked dependencies only and expires in one day.
 - RUNBOOK.md documents the exact owner sequence, denial semantics, full-log review,
   personal billing/lifecycle attestation and stop-on-failure rule. No live M0 item is
-  checked off. The legacy workflow remains locally disabled and remotely unchanged.
+  checked off. The legacy workflow is now published in its disabled form.
 
 Files: .github/workflows/triage-m0.yml, src/issue_triage_bot/m0_runtime.py,
 tests/unit/test_m0_runtime.py, docs/m0/{REVIEW,RUNBOOK}.md, EXECUTION_STATUS.md.
@@ -54,27 +54,36 @@ tests/unit/test_m0_runtime.py, docs/m0/{REVIEW,RUNBOOK}.md, EXECUTION_STATUS.md.
 - Built a wheel, installed exported hash-locked dependencies into a separate temp
   environment, and ran the installed package through prepare/mock denial/mock SDK/
   validate. Pass; no OAuth or real GitHub request occurred.
-- Workflow parsing and executable helper behavior are locally tested; GitHub's remote
-  workflow validation, actual Linux Action/CLI execution and full logs are unverified.
+- GitHub CI run 35395096666 passed all checks on Python 3.11 and 3.12 at 5b46739.
+  Actual M0 Linux Action/CLI execution, effective isolation and full logs are unverified.
 - The pinned Action logs context prompts and may log SDK errors. Masks cover known
   literal/JSON forms; full live privacy review remains mandatory. Canary checks cannot
   prove absence of every conceivable encoding. No fallback tools/permissions are added.
 
+## Owner-approved publication checkpoint
+
+- Published verified commits through 5b46739 to origin/main following the owner's
+  explicit approval. Read-only GitHub CI completed successfully:
+  https://github.com/afoxnyc3/issue-triage-bot/actions/runs/35395096666
+- Created triage-m0 environment with required reviewer afoxnyc3, self-review blocked,
+  and a main-branch-only deployment policy. Read-back confirms those settings.
+- Set TRIAGE_M0_ENABLED=false and verified the value. No fixture number selected,
+  no test issue opened, no inference started and no repository secret inspected or
+  modified. Production control remains disabled. Owner files remain untouched.
+- This resolves publication/environment setup. Existing code verification applies;
+  this follow-up changes documentation only, checked with git diff --check.
+
 ## Exact next checkpoint / genuine owner blocker
 
-M0 live acceptance now requires the owner-only sequence in docs/m0/RUNBOOK.md:
-authorize publishing, configure the protected environment/one-fixture variables,
-confirm personal Max using /status, run claude setup-token outside Codex and store it
-directly as the repository OAuth secret, then obtain a non-collaborator fixture run
-and redacted privacy/billing/lifecycle attestations. No token should enter this task.
-CODEX_EXECUTION_PROMPT.md says to stop when this live owner action is required.
-The same owner-only live M0 blocker was confirmed across three consecutive goal
-turns. The last continuation made no implementation progress: it revalidated the
-unchanged gate, not a running process. Current Git status still contains only the
-preserved owner-untracked files; no live evidence or publishing authorization has
-arrived. The durable goal is blocked on this owner action, not complete. This is
-separate from the earlier resolved source-parser investigation. No milestone is
-marked complete; resume with the redacted live M0 evidence described above.
+Outside Codex, the owner must confirm personal Max via /status, run claude setup-token,
+and store the result directly as the repository OAuth secret. Then coordinate a
+non-collaborator fixture issue, enable the one-fixture gate, approve its protected
+job, and supply redacted privacy/billing/lifecycle evidence using docs/m0/RUNBOOK.md.
+No token should enter this task. Publishing approval does not supply this evidence
+or authorize Codex to perform the owner-only token operations forbidden by the prompt.
+No live acceptance item or milestone is marked complete. This resumed turn made
+progress on publication/setup; the remaining authentication/live-evidence blocker
+is freshly observed. The previous blocked durable goal is not marked complete.
 
 After M0 passes, resume preflight/admission reservation accounting and M2 wiring,
 followed by real M1/M2 acceptance, evaluation/shadow/write rollout, operations/cutover.
@@ -84,8 +93,8 @@ An actual M0 control failure requires architectural review, not a weakened check
 
 - Only the owner confirms personal Max identity, generates/stores OAuth outside
   Codex, attests billing attribution and records rotation/expiry without token value.
-- Publishing/running the eventual reviewed M0 harness needs authorization; no push
-  or live GitHub writes have been performed. No secret was accessed or modified.
+- Publishing was authorized and completed. Protected environment configured; M0
+  remains disabled pending owner authentication. No secret was accessed or modified.
 - M1 GitHub dry-run and real issue acceptance, all M2 integration checks, adversarial
   evaluation plus real shadow observations, approved comment/type-label rollout,
   operational runbooks and safe cutover remain required. Priority stays advisory.
@@ -96,6 +105,6 @@ An actual M0 control failure requires architectural review, not a weakened check
 Started at main f0b84f9, already ahead of origin/main. Owner's initial PLAN.md was
 explicitly authorized for amendment/commit. CODEX_EXECUTION_PROMPT.md and .claude/
 remain untouched/untracked. No AGENTS.md/CLAUDE.md found in root/ancestor paths.
-No push/merge/release, secret operation or inference performed. The legacy workflow
-is not disabled remotely until the owner publishes these changes. Local legacy
-code is retained for cutover/history; its old SDK environment is no longer installed.
+Verified commits were pushed after explicit owner approval. No merge/release, secret
+operation, issue mutation or inference performed. Legacy code is retained for
+cutover/history; its old SDK environment is no longer installed.
