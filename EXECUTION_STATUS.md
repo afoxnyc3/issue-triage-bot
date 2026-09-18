@@ -27,39 +27,37 @@ write or M0 inference has run; live M1 acceptance remains pending. M0 live gate 
 
 ## Latest completed/checkpoint work
 
-- 04ea950: signed comment-first apply state machine and crash recovery (196 tests).
-- Current M1 CLI checkpoint: installed `triage apply/check/setup-labels/repair` entry
-  point; default dry-run, explicit workflow-context-bound apply writes, concrete
-  per-write guards, bounded inputs and redacted errors/audits. No OAuth access.
-- Dry-run reports include planned comment/label operations, decision hash and intended
-  outcome. Label setup fences the full live release before each creation. Repair
-  performs bounded read-only enumeration, excluding pull requests and rejecting
-  foreign/duplicate issues; unreadable authenticated state is surfaced for review.
-- Shared in-memory gateway moved to tests/fakes.py for CLI/integration verification.
-  Operator contracts and runtime environment are documented in docs/CLI.md.
+- 76a9df9: guarded operator CLI and redacted dry-run audits (211 tests).
+- Current M0 evidence checkpoint: strict two-field probe output, bounded SDK execution
+  parsing, exact model identity, empty built-in/MCP inventories, no tool-call blocks,
+  successful bounded turns and absent environment/file canaries. Known literal,
+  case-folded, base64 and hex canary representations are rejected throughout messages.
+- Deterministic GitHub probe must observe HTTP 403 and the integration-permission
+  denial message. Rate limiting, unauthorized/invalid endpoint responses and model
+  claims do not establish read-only enforcement.
+- Evidence contains only hashes, model/action identity and fixed booleans. It cannot
+  mark M0 passed: non-collaborator trigger, full log/artifact privacy, personal billing
+  and token lifecycle remain explicitly pending owner/live-run evidence.
 
-Files: pyproject.toml, src/issue_triage_bot/{cli,apply,github}.py,
-tests/{__init__,fakes}.py, tests/unit/{test_cli,test_github}.py,
-tests/integration/test_apply.py, docs/CLI.md, EXECUTION_STATUS.md.
+Files: src/issue_triage_bot/m0.py, tests/unit/test_m0.py, EXECUTION_STATUS.md.
 
 ## Verification
 
-- Targeted CLI/GitHub tests: 44 pass, including default nonwriting behavior, explicit
-  guarded comment-only writes, workflow mismatch, key redaction, repair enumeration,
-  pagination and prompt drift between label creations.
-- Full suite: 211 tests pass on Python 3.12.12. Ruff format/lint, strict mypy
-  (12 source files) and git diff --check pass. No live credentials, model, GitHub
-  writes or remote CI used.
-- Apply canary mutations still require a durable reservation adapter. Repair remains
-  inspection only. Early CLI failures can precede audit creation; workflow fallback
-  audit handling is still needed. No model-dependent acceptance is claimed.
+- 30 focused tests cover healthy metadata, tool inventory/calls, model mismatch,
+  malformed/duplicate/incomplete/reordered execution, bad structured output and turns,
+  canary encodings and permission-denial distinction. No real inference was invoked.
+- Full suite: 241 tests pass on Python 3.12.12; Ruff formatting/lint, strict mypy
+  (13 source files), and git diff --check pass.
+- Canary matching is evidence for tested representations, not proof against every
+  possible encoding. Ephemeral execution files must never be uploaded. The validator
+  alone cannot inspect complete Actions logs or prove subscription attribution.
 
 ## Exact next checkpoint
 
-Return to the earliest incomplete gate: implement and locally verify the M0 harness
-and its redacted evidence validator. Keep it disabled pending owner publishing and
-personal Max authentication/billing attestation. Then continue preflight/admission
-and M2 workflow integration as allowed by M0 results.
+M0 disabled workflow harness: trusted credential-free build/preparation, isolated
+no-checkout read-only inference job, scoped OAuth input, independent permission probe,
+local redacted validation and metadata-only artifact. Verify wiring statically and
+with mocked runtime fixtures, then document the exact owner-operated live sequence.
 
 ## Owner actions / remaining acceptance
 
