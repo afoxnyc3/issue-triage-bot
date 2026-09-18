@@ -68,9 +68,13 @@ confirm personal Max using /status, run claude setup-token outside Codex and sto
 directly as the repository OAuth secret, then obtain a non-collaborator fixture run
 and redacted privacy/billing/lifecycle attestations. No token should enter this task.
 CODEX_EXECUTION_PROMPT.md says to stop when this live owner action is required.
-This is blocker observation 1 for the current live M0 gate (not the earlier resolved
-source-parser investigation). Durable goal remains active pending required recurrence
-before blocked status can be set. No milestone is marked complete.
+The same owner-only live M0 blocker was confirmed across three consecutive goal
+turns. The last continuation made no implementation progress: it revalidated the
+unchanged gate, not a running process. Current Git status still contains only the
+preserved owner-untracked files; no live evidence or publishing authorization has
+arrived. The durable goal is blocked on this owner action, not complete. This is
+separate from the earlier resolved source-parser investigation. No milestone is
+marked complete; resume with the redacted live M0 evidence described above.
 
 After M0 passes, resume preflight/admission reservation accounting and M2 wiring,
 followed by real M1/M2 acceptance, evaluation/shadow/write rollout, operations/cutover.
