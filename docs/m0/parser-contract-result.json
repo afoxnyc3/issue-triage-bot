@@ -1,0 +1,12 @@
+{
+  "action_sha": "4036a180cf690f49529f5d8c79c998855287f590",
+  "parser_sha256": "b42cc8daa1d15fb00321784cec375b1c855bb2e41bf03b37dfd462385f9e5548",
+  "checks": {
+    "empty_tools_preserved": false,
+    "nonempty_tools_preserved": true,
+    "mcp_denial_preserved": true,
+    "max_turns_preserved": true
+  },
+  "observed_empty_tools_value": null,
+  "passed": false
+}

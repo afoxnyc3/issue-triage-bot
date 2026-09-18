@@ -1,55 +1,71 @@
 # Execution status
 
-Updated: 2026-09-18. Durable goal created in the active Codex task.
+Updated: 2026-09-18. Durable goal exists in the active Codex task; objective incomplete.
 
-## Current checkpoint
+## Current milestone / checkpoint
 
-M0 / prerequisite plan alignment. Approved execution amendments are now explicit in
-PLAN.md; original review history remains preserved. No live acceptance is claimed.
+M0: source-level isolation precheck failed; awaiting architectural review under the
+execution prompt's explicit failed-check stop rule. See docs/m0/REVIEW.md.
+No M0 live checklist item has passed. M1–M3 have not started; M4 is optional/deferred.
 
-## Repository baseline and preservation
+## Completed work
 
-- Started on main at f0b84f9 (one local commit ahead of origin/main).
-- Existing owner work: untracked PLAN.md, CODEX_EXECUTION_PROMPT.md and .claude/.
-- PLAN.md is explicitly authorized for amendment and inclusion in a checkpoint.
-- CODEX_EXECUTION_PROMPT.md and .claude/ remain untouched and unstaged.
-- No AGENTS.md or CLAUDE.md found in repository root or ancestor instruction paths.
-- Legacy workflow still exists; no secret operations or remote writes performed.
+- Read CODEX_EXECUTION_PROMPT.md and PLAN.md completely; inspected existing code,
+  dependencies, workflow, recent history, branches and referenced refresh context.
+- Committed plan alignment as 741717f: all 15 approved amendments take precedence,
+  credential-free work is allowed before M0, priority is advisory, safe cutover,
+  authenticated state, live release fences and audit privacy are explicit.
+- Reviewed candidate upstream action 4036a180cf690f49529f5d8c79c998855287f590.
+- Added a credential-free, hash-checked parser reproducer and redacted result.
+- Confirmed empty `--tools ""` becomes null; nonempty tools, MCP deny rule and
+  turn limit survive parsing. This does NOT establish runtime tool exposure.
+- Recorded review options and the pending live checklist/owner sequence.
 
-## Completed work / files
+## Files in current evidence checkpoint
 
-- Read CODEX_EXECUTION_PROMPT.md and PLAN.md completely; inspected current legacy
-  code, dependencies, workflow, recent commits and branches.
-- PLAN.md: recorded all 15 approved amendments and corrected milestone gating,
-  architecture, cutover and rollout text. Historical conflicting details explicitly
-  defer to Section 0.
-- EXECUTION_STATUS.md: established checkpoint/evidence ledger.
+- scripts/m0/check-action-parser.ts
+- docs/m0/parser-contract-result.json
+- docs/m0/REVIEW.md
+- EXECUTION_STATUS.md
 
-## Verification
+## Verification commands and outcomes
 
-- Documentation checkpoint: reviewed against all 15 execution amendments.
-- `git diff --check`: passed (documentation only).
-- No application tests exist in baseline; no runtime implementation changed here.
+- `bun scripts/m0/check-action-parser.ts /tmp/triage-action-parser-probe/parse-sdk-options.ts`:
+  expected exit 1; empty-tools preservation false, three control checks true.
+- Source SHA-256 independently checked against the pinned upstream file:
+  b42cc8daa1d15fb00321784cec375b1c855bb2e41bf03b37dfd462385f9e5548.
+- Probe without a path / with a changed source: both exit 2 as expected; changed
+  source rejected before import. Recorded JSON exactly matches rerun.
+- `git diff --check`: passed for plan and evidence checkpoints.
+- Baseline has no application test suite, formatting CI or type-check configuration
+  for this TypeScript diagnostic. No application acceptance or live tests claimed.
+- Initial Bun install failed on sandbox temp-directory access; retried successfully
+  with TMPDIR/cache under /private/tmp. No permission weakening was required.
 
-## Owner actions and gates
+## Owner actions / exact next checkpoint
 
-M0 remains unproven. Owner must locally confirm personal Max identity using Claude
-Code `/status`, run `claude setup-token`, and store directly in the GitHub repository
-secret CLAUDE_CODE_OAUTH_TOKEN. Never paste the value into this task or any file.
-Publishing/running a harness and production rollout require separate authorization;
-this task does not authorize pushing or enabling production writes.
+Architectural review of the failed argument-preservation check is required before a
+secret-bearing harness. Investigate a corrected reviewed action revision or the
+current documented deny-all syntax, preserving empty-inventory acceptance. No fork,
+broader permissions, API billing or alternate runtime was substituted. After review,
+implement/test the credential-free M0 harness, then obtain owner authorization to
+publish/run it. Owner alone confirms personal Max identity, creates/stores OAuth
+outside Codex, and verifies subscription attribution and rotation behavior.
 
-## Risks / follow-ups
+The goal remains active because the durable-goal blocked status requires the same
+blocker across three consecutive goal turns. This is the first blocked observation;
+do not mark complete or fabricate live evidence. On continuation, check for owner
+review direction before dependent implementation and honor the failed-M0 stop rule.
 
-Upstream action/tool isolation and privacy must be source-reviewed before preparing
-an OAuth-bearing harness. M0 must not be weakened if an upstream limitation fails a
-required check. Current upstream main resolved to
-4036a180cf690f49529f5d8c79c998855287f590 for review, not yet accepted as a runtime pin.
+## Preservation / risks
 
-## Exact next checkpoint
-
-Source-review the pinned Claude Code Action for tool isolation, no checkout,
-read-only token handling, structured output and log privacy; build a credential-free
-M0 harness/checklist if those requirements are supportable. Record any hard failure
-and stop for architectural review if necessary. Otherwise continue bounded M1
-foundations while M0 live owner evidence is pending.
+- Started on main at f0b84f9, already one local commit ahead of origin/main.
+- Owner's initially untracked PLAN.md was explicitly authorized for amendment and
+  committed; CODEX_EXECUTION_PROMPT.md and .claude/ remain untouched/untracked.
+- No AGENTS.md or CLAUDE.md found in root or ancestor instruction paths.
+- No push, GitHub write, OAuth invocation, secret operation or inference performed.
+- Legacy code/workflow/classifier/memory/migration remain intact. The remote legacy
+  workflow has not been disabled; making it manual-only is still required before
+  replacement validation and cutover. No production-write changes have been enabled.
+- No uv.lock/new CI exists yet. No runtime milestone is complete. Empty-flag behavior
+  beyond the parser, complete log privacy and all live gates remain unverified.
