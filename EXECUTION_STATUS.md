@@ -28,36 +28,53 @@ write or M0 inference has run; live M1 acceptance remains pending. M0 live gate 
 ## Latest completed/checkpoint work
 
 - 76a9df9: guarded operator CLI and redacted dry-run audits (211 tests).
-- Current M0 evidence checkpoint: strict two-field probe output, bounded SDK execution
-  parsing, exact model identity, empty built-in/MCP inventories, no tool-call blocks,
-  successful bounded turns and absent environment/file canaries. Known literal,
-  case-folded, base64 and hex canary representations are rejected throughout messages.
-- Deterministic GitHub probe must observe HTTP 403 and the integration-permission
-  denial message. Rate limiting, unauthorized/invalid endpoint responses and model
-  claims do not establish read-only enforcement.
-- Evidence contains only hashes, model/action identity and fixed booleans. It cannot
-  mark M0 passed: non-collaborator trigger, full log/artifact privacy, personal billing
-  and token lifecycle remain explicitly pending owner/live-run evidence.
+- d60a948: bounded M0 evidence validator (241 tests).
+- Current M0 harness checkpoint: default-off issue-number gate, trusted credential-free
+  validator build, same-run artifact hashes verified before execution, no-checkout
+  probe job with contents/issues read only, protected triage-m0 environment, OAuth
+  scoped to the pinned Action input, and an independent single forbidden-write probe.
+- Bounded non-collaborator issue-opened fixture, same-job masking including JSON forms,
+  two private ephemeral canaries, strict no-tool candidate configuration, local SDK
+  evidence validation, metadata-only 30-day audit artifact and always-run cleanup.
+  Build artifact contains trusted code/locked dependencies only and expires in one day.
+- RUNBOOK.md documents the exact owner sequence, denial semantics, full-log review,
+  personal billing/lifecycle attestation and stop-on-failure rule. No live M0 item is
+  checked off. The legacy workflow remains locally disabled and remotely unchanged.
 
-Files: src/issue_triage_bot/m0.py, tests/unit/test_m0.py, EXECUTION_STATUS.md.
+Files: .github/workflows/triage-m0.yml, src/issue_triage_bot/m0_runtime.py,
+tests/unit/test_m0_runtime.py, docs/m0/{REVIEW,RUNBOOK}.md, EXECUTION_STATUS.md.
 
 ## Verification
 
-- 30 focused tests cover healthy metadata, tool inventory/calls, model mismatch,
-  malformed/duplicate/incomplete/reordered execution, bad structured output and turns,
-  canary encodings and permission-denial distinction. No real inference was invoked.
-- Full suite: 241 tests pass on Python 3.12.12; Ruff formatting/lint, strict mypy
-  (13 source files), and git diff --check pass.
-- Canary matching is evidence for tested representations, not proof against every
-  possible encoding. Ephemeral execution files must never be uploaded. The validator
-  alone cannot inspect complete Actions logs or prove subscription attribution.
+- 17 runner/workflow tests pass: event/association/bounds/debug guards, same-job masking,
+  secret-free preparation, single denied write with no retry, redacted local validation,
+  permission/checkout/OAuth/artifact boundaries and tampered bundle rejection.
+- Full suite: 258 tests pass on Python 3.12.12 and Python 3.11.15. Ruff formatting/lint,
+  strict mypy (14 source files), and git diff --check pass.
+- Built a wheel, installed exported hash-locked dependencies into a separate temp
+  environment, and ran the installed package through prepare/mock denial/mock SDK/
+  validate. Pass; no OAuth or real GitHub request occurred.
+- Workflow parsing and executable helper behavior are locally tested; GitHub's remote
+  workflow validation, actual Linux Action/CLI execution and full logs are unverified.
+- The pinned Action logs context prompts and may log SDK errors. Masks cover known
+  literal/JSON forms; full live privacy review remains mandatory. Canary checks cannot
+  prove absence of every conceivable encoding. No fallback tools/permissions are added.
 
-## Exact next checkpoint
+## Exact next checkpoint / genuine owner blocker
 
-M0 disabled workflow harness: trusted credential-free build/preparation, isolated
-no-checkout read-only inference job, scoped OAuth input, independent permission probe,
-local redacted validation and metadata-only artifact. Verify wiring statically and
-with mocked runtime fixtures, then document the exact owner-operated live sequence.
+M0 live acceptance now requires the owner-only sequence in docs/m0/RUNBOOK.md:
+authorize publishing, configure the protected environment/one-fixture variables,
+confirm personal Max using /status, run claude setup-token outside Codex and store it
+directly as the repository OAuth secret, then obtain a non-collaborator fixture run
+and redacted privacy/billing/lifecycle attestations. No token should enter this task.
+CODEX_EXECUTION_PROMPT.md says to stop when this live owner action is required.
+This is blocker observation 1 for the current live M0 gate (not the earlier resolved
+source-parser investigation). Durable goal remains active pending required recurrence
+before blocked status can be set. No milestone is marked complete.
+
+After M0 passes, resume preflight/admission reservation accounting and M2 wiring,
+followed by real M1/M2 acceptance, evaluation/shadow/write rollout, operations/cutover.
+An actual M0 control failure requires architectural review, not a weakened check.
 
 ## Owner actions / remaining acceptance
 

@@ -76,12 +76,10 @@ CI test and must not be silently inverted to authorize inference.
 
 ## Remaining runtime review
 
-Choose a reviewed way to establish an empty effective tool inventory before enabling
-OAuth inference. Options to investigate include a corrected upstream parser/revision
-or a documented deny-all configuration (`--disallowedTools "*"` is currently documented).
-The latter was checked only for parser preservation, not runtime behavior. Do not
-replace the empty-inventory acceptance criterion with a list of approved tools or
-with model assurances. Any revised configuration must pass the same live checks.
+The candidate harness now uses `--tools=` with MCP denial and a strict empty MCP
+configuration. Source transport evidence remains limited to the pinned parser/SDK;
+only the live effective inventory can pass the control. See [RUNBOOK.md](RUNBOOK.md)
+for the disabled workflow, local evidence validator and complete owner sequence.
 A fork, alternative runtime, broader permissions or billing change is not authorized.
 
 ## Live acceptance checklist — all pending
@@ -100,7 +98,7 @@ Normal output hides tool inventory in the reviewed action; inspect the temporary
 execution file locally on the ephemeral runner and emit only validated metadata.
 Do not enable full/debug output to obtain the inventory: the parser turns full
 output on when ACTIONS_STEP_DEBUG is true, and transcripts can contain issue data.
-This inspection strategy is still to be implemented and tested after review.
+The local inspection strategy is implemented and mock-tested; live evidence remains pending.
 
 ## Exact owner-operated sequence after review
 
@@ -112,9 +110,9 @@ This inspection strategy is still to be implemented and tested after review.
 5. Run the approved live harness with a non-collaborator test issue and supply only
    the redacted run/checklist evidence and billing/rotation attestations.
 
-No runnable M0 workflow has been installed. The legacy workflow remains unchanged
-locally and remotely; disable/make it manual-only at the first implementation
-checkpoint before validating the replacement. Legacy deletion waits for cutover.
+The M0 workflow is now committed locally with a default-off one-fixture gate. The
+legacy workflow is manual-only and hard-disabled locally; its remote copy is unchanged
+until publishing. Legacy deletion still waits for accepted replacement cutover.
 
 ## Candidate model configuration
 

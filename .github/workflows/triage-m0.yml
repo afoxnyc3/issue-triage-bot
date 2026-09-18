@@ -1,0 +1,132 @@
+name: M0 personal Max isolation gate
+on:
+  issues:
+    types: [opened]
+# Deliberately inert until the owner publishes, configures the protected environment,
+# selects one future fixture issue number, and sets TRIAGE_M0_ENABLED=true.
+permissions: {}
+concurrency:
+  group: triage-m0-${{ github.repository }}
+  queue: max
+jobs:
+  prepare-validator:
+    if: >-
+      vars.TRIAGE_M0_ENABLED == 'true' &&
+      format('{0}', github.event.issue.number) == vars.TRIAGE_M0_ISSUE_NUMBER
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      wheel_sha: ${{ steps.bundle.outputs.wheel_sha }}
+      requirements_sha: ${{ steps.bundle.outputs.requirements_sha }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+        with:
+          version: '0.11.1'
+          python-version: '3.12'
+          enable-cache: false
+      - name: Build trusted validator bundle (no runtime data or credentials)
+        run: |
+          uv sync --locked
+          uv run --locked pytest -q tests/unit/test_m0.py tests/unit/test_m0_runtime.py
+          mkdir -p "$RUNNER_TEMP/m0-validator"
+          uv export --locked --no-dev --no-emit-project --format requirements.txt --output-file "$RUNNER_TEMP/m0-validator/requirements.txt" > /dev/null
+          uv build --wheel --out-dir "$RUNNER_TEMP/m0-validator"
+      - name: Bind exact executable bundle hashes
+        id: bundle
+        shell: python
+        run: |
+          import hashlib, os
+          from pathlib import Path
+          root = Path(os.environ["RUNNER_TEMP"]) / "m0-validator"
+          wheels = list(root.glob("*.whl"))
+          assert len(wheels) == 1
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              for key, path in [("wheel_sha", wheels[0]), ("requirements_sha", root / "requirements.txt")]:
+                  output.write(key + "=" + hashlib.sha256(path.read_bytes()).hexdigest() + "\n")
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: m0-validator-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/m0-validator/*.whl
+            ${{ runner.temp }}/m0-validator/requirements.txt
+          if-no-files-found: error
+          retention-days: 1
+  probe:
+    needs: prepare-validator
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: triage-m0
+    permissions:
+      contents: read
+      issues: read
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: m0-validator-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/m0-validator
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+        with:
+          version: '0.11.1'
+          python-version: '3.12'
+          enable-cache: false
+      - name: Verify same-run bundle before executing any downloaded code
+        shell: python
+        env:
+          EXPECTED_WHEEL_SHA: ${{ needs.prepare-validator.outputs.wheel_sha }}
+          EXPECTED_REQUIREMENTS_SHA: ${{ needs.prepare-validator.outputs.requirements_sha }}
+        run: |
+          import hashlib, os, re
+          from pathlib import Path
+          root = Path(os.environ["RUNNER_TEMP"]) / "m0-validator"
+          wheels = list(root.glob("*.whl"))
+          assert len(wheels) == 1 and len(list(root.iterdir())) == 2
+          for key, path in [("EXPECTED_WHEEL_SHA", wheels[0]), ("EXPECTED_REQUIREMENTS_SHA", root / "requirements.txt")]:
+              expected = os.environ[key]
+              assert re.fullmatch("[0-9a-f]{64}", expected)
+              assert path.is_file() and not path.is_symlink()
+              assert hashlib.sha256(path.read_bytes()).hexdigest() == expected
+      - name: Install only the trusted validator bundle
+        run: |
+          uv venv "$RUNNER_TEMP/m0-venv" --python 3.12
+          uv pip install --python "$RUNNER_TEMP/m0-venv/bin/python" --require-hashes -r "$RUNNER_TEMP/m0-validator/requirements.txt"
+          uv pip install --python "$RUNNER_TEMP/m0-venv/bin/python" --no-deps "$RUNNER_TEMP"/m0-validator/*.whl
+      - name: Prepare bounded masked fixture and private canaries
+        id: fixture
+        env:
+          M0_ISSUE_NUMBER: ${{ vars.TRIAGE_M0_ISSUE_NUMBER }}
+        run: '"$RUNNER_TEMP/m0-venv/bin/python" -m issue_triage_bot.m0_runtime prepare'
+      - name: Require independent denial of the supplied token's write
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: '"$RUNNER_TEMP/m0-venv/bin/python" -m issue_triage_bot.m0_runtime permission-probe'
+      - name: Run isolated adversarial probe
+        uses: anthropics/claude-code-action@4036a180cf690f49529f5d8c79c998855287f590
+        with:
+          github_token: ${{ github.token }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_non_write_users: '*'
+          prompt: ${{ steps.fixture.outputs.prompt }}
+          claude_args: ${{ steps.fixture.outputs.claude_args }}
+          show_full_output: 'false'
+          display_report: 'false'
+          track_progress: 'false'
+          use_sticky_comment: 'false'
+      - name: Validate ephemeral execution locally (never upload transcript)
+        run: '"$RUNNER_TEMP/m0-venv/bin/python" -m issue_triage_bot.m0_runtime validate'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: m0-evidence-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/m0-evidence.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Remove ephemeral fixture and execution files
+        if: always()
+        shell: bash
+        run: |
+          rm -f "$RUNNER_TEMP/m0-environment-canary" "$RUNNER_TEMP/m0-file-canary" "$RUNNER_TEMP/claude-execution-output.json"
+          rm -rf "$RUNNER_TEMP/claude-prompts"
