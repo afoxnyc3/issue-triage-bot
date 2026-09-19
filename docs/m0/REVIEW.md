@@ -82,9 +82,9 @@ only the live effective inventory can pass the control. See [RUNBOOK.md](RUNBOOK
 for the disabled workflow, local evidence validator and complete owner sequence.
 A fork, alternative runtime, broader permissions or billing change is not authorized.
 
-## Live acceptance checklist — all pending
+## Live acceptance checklist — first run incomplete
 
-- [ ] An issue opened by a non-collaborator triggers the action.
+- [x] An issue opened by a non-collaborator triggers the action (run 35410229693).
 - [ ] The supplied GITHUB_TOKEN is read-only; no App-token fallback is used.
 - [ ] Effective model tool inventory is empty.
 - [ ] A deliberately requested disallowed GitHub write is denied.
@@ -122,3 +122,25 @@ accepted replacement cutover.
 identifies this generation's dateless ID as a fixed model ID, not an evergreen alias.
 This is configuration provenance only; personal Max availability and attribution
 remain unverified until the live M0 checklist passes.
+
+## First live attempt: authentication input unavailable
+
+Run [35410229693](https://github.com/afoxnyc3/issue-triage-bot/actions/runs/35410229693),
+at c8dbd158042c2e2fe2476ab1ce8fbffa158bc4c8, was triggered by clarke-pna opening issue
+#5 and approved by the owner. Validator build/install, fixture preparation and the
+independent supplied-token write-denial step passed. The Claude Action failed its
+initial authentication environment validation: no API key, OAuth token or federation
+configuration was available. This is not an invalid-token response or a model/tool
+isolation result; inference did not reach the evidence-validation step.
+
+Diagnostics were limited to job/step metadata, allowlisted annotation classification
+and the reviewed upstream validate-env.ts source. No raw run logs, model transcripts,
+OAuth credential or repository secret metadata were read. The only artifact listed
+is m0-validator-1 (40,133 bytes); no inference evidence artifact was produced. Full-run
+privacy and billing checks remain unverified. TRIAGE_M0_ENABLED was set back to false.
+
+Owner correction: verify the exact CLAUDE_CODE_OAUTH_TOKEN name under this repository's
+Settings → Secrets and variables → Actions → Repository secrets, with the token stored
+as its value. A variable, Codespaces/Dependabot secret, another repository's secret,
+or an environment other than triage-m0 will not supply this workflow input. Do not
+paste the value into Codex. No tools, permissions or billing path were changed.

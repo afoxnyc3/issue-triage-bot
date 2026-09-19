@@ -73,29 +73,30 @@ tests/unit/test_m0_runtime.py, docs/m0/{REVIEW,RUNBOOK}.md, EXECUTION_STATUS.md.
 - This resolves publication/environment setup. Existing code verification applies;
   this follow-up changes documentation only, checked with git diff --check.
 
-## Token test requested / live trigger pending
+## First live attempt: authentication input unavailable
 
-The owner reports the OAuth repository secret is set and explicitly requested a test.
-No secret value or secret metadata was inspected. Read-only checks confirmed the
-connected GitHub identity is repository owner afoxnyc3, the newest issue/PR number is
-4, and no M0 runs exist. The protected environment still requires afoxnyc3 review and
-prevents self-review. An owner-opened issue cannot satisfy the non-collaborator gate;
-Codex cannot create or impersonate that independent account or bypass the review.
+Run 35410229693 at c8dbd158042c2e2fe2476ab1ce8fbffa158bc4c8 was triggered by
+non-collaborator clarke-pna opening issue #5 and approved by the owner. The validator
+build/install, masked fixture setup and independent supplied-token write-denial step
+passed. The Claude Action failed at authentication environment validation because
+no authentication input was available. This does not demonstrate a rejected/expired
+token; tool inventory, canary isolation, structured output and billing remain untested.
+No M0 inference evidence artifact was produced. See docs/m0/REVIEW.md for redacted facts.
 
-Set and read back TRIAGE_M0_ISSUE_NUMBER=5 and TRIAGE_M0_ENABLED=true for this single
-owner-authorized fixture. Production triage remains disabled. A human non-collaborator
-must now open synthetic issue #5, then the owner must approve the triage-m0 environment
-job. If another issue takes #5 first, recheck numbering before arming a replacement.
-After the fixture triggers, set TRIAGE_M0_ENABLED=false. No inference, token validity,
-isolation, privacy or billing result is claimed until the actual run provides evidence.
+Set TRIAGE_M0_ENABLED=false after this completed attempt. Diagnostics read only job
+metadata, allowlisted annotation classifications, artifact names/sizes and reviewed
+upstream source. No token, secret metadata, raw logs or model transcripts were read.
+No fallback permissions/tools/provider were added and production triage stays disabled.
 
 ## Exact next checkpoint / genuine owner blocker
 
-Have a non-collaborator open issue #5 using the synthetic fixture in docs/m0/RUNBOOK.md;
-approve its protected job. Then inspect redacted M0 evidence and full-run privacy, and
-obtain the owner's personal Max billing/lifecycle attestations. The prompt explicitly
-requires the non-collaborator trigger; do not substitute an owner-triggered run and
-claim M0 passed. Authentication is reported configured but not yet tested.
+The owner must verify the exact CLAUDE_CODE_OAUTH_TOKEN repository Actions secret in
+afoxnyc3/issue-triage-bot (not an Actions variable, Codespaces/Dependabot secret, another
+repository or an unrelated environment). Secret inspection/correction remains outside
+Codex under the execution prompt. Then coordinate the next protected live attempt;
+do not claim M0 passed from partial setup/write-denial success. Failed-job-only reruns
+also need care: the validator artifact name includes run_attempt, so a fresh attempt
+must build its own bundle. Personal Max billing/lifecycle attestations remain pending.
 
 After M0 passes, resume preflight/admission reservation accounting and M2 wiring,
 followed by real M1/M2 acceptance, evaluation/shadow/write rollout, operations/cutover.
@@ -105,8 +106,8 @@ An actual M0 control failure requires architectural review, not a weakened check
 
 - Only the owner confirms personal Max identity, generates/stores OAuth outside
   Codex, attests billing attribution and records rotation/expiry without token value.
-- Publishing was authorized and completed. Protected environment configured; The single-fixture M0 gate
-  is now armed at the owner's request; its non-collaborator trigger is pending. No secret was accessed or modified.
+- Publishing was authorized and completed. Protected environment configured; The first M0 attempt
+  failed with authentication input unavailable; the gate is disabled again. No secret was accessed or modified.
 - M1 GitHub dry-run and real issue acceptance, all M2 integration checks, adversarial
   evaluation plus real shadow observations, approved comment/type-label rollout,
   operational runbooks and safe cutover remain required. Priority stays advisory.

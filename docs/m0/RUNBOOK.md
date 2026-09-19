@@ -5,7 +5,8 @@ variable `TRIAGE_M0_ENABLED` equals `true` and the opened issue number matches
 `TRIAGE_M0_ISSUE_NUMBER`. The owner approved publishing on 2026-09-18; the harness and disabled legacy workflow
 are now on main. No live OAuth inference has run. The triage-m0 environment requires
 afoxnyc3 review, prevents self-review and permits only main. At the owner's subsequent
-test request, the M0 gate was armed for issue #5; no live run has started yet.
+test request, the M0 gate was armed for issue #5. Its first run failed before inference
+because authentication input was unavailable; the gate is now disabled again. See REVIEW.md.
 M0 success does not enable production triage or authorize type-label rollout.
 
 ## What the reviewed harness does
