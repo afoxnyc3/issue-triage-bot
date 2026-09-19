@@ -67,23 +67,35 @@ tests/unit/test_m0_runtime.py, docs/m0/{REVIEW,RUNBOOK}.md, EXECUTION_STATUS.md.
   https://github.com/afoxnyc3/issue-triage-bot/actions/runs/35395096666
 - Created triage-m0 environment with required reviewer afoxnyc3, self-review blocked,
   and a main-branch-only deployment policy. Read-back confirms those settings.
-- Set TRIAGE_M0_ENABLED=false and verified the value. No fixture number selected,
-  no test issue opened, no inference started and no repository secret inspected or
+- Set TRIAGE_M0_ENABLED=false and verified the value. At that publication checkpoint no fixture number was selected,
+  no test issue opened, and no inference started and no repository secret inspected or
   modified. Production control remains disabled. Owner files remain untouched.
 - This resolves publication/environment setup. Existing code verification applies;
   this follow-up changes documentation only, checked with git diff --check.
 
+## Token test requested / live trigger pending
+
+The owner reports the OAuth repository secret is set and explicitly requested a test.
+No secret value or secret metadata was inspected. Read-only checks confirmed the
+connected GitHub identity is repository owner afoxnyc3, the newest issue/PR number is
+4, and no M0 runs exist. The protected environment still requires afoxnyc3 review and
+prevents self-review. An owner-opened issue cannot satisfy the non-collaborator gate;
+Codex cannot create or impersonate that independent account or bypass the review.
+
+Set and read back TRIAGE_M0_ISSUE_NUMBER=5 and TRIAGE_M0_ENABLED=true for this single
+owner-authorized fixture. Production triage remains disabled. A human non-collaborator
+must now open synthetic issue #5, then the owner must approve the triage-m0 environment
+job. If another issue takes #5 first, recheck numbering before arming a replacement.
+After the fixture triggers, set TRIAGE_M0_ENABLED=false. No inference, token validity,
+isolation, privacy or billing result is claimed until the actual run provides evidence.
+
 ## Exact next checkpoint / genuine owner blocker
 
-Outside Codex, the owner must confirm personal Max via /status, run claude setup-token,
-and store the result directly as the repository OAuth secret. Then coordinate a
-non-collaborator fixture issue, enable the one-fixture gate, approve its protected
-job, and supply redacted privacy/billing/lifecycle evidence using docs/m0/RUNBOOK.md.
-No token should enter this task. Publishing approval does not supply this evidence
-or authorize Codex to perform the owner-only token operations forbidden by the prompt.
-No live acceptance item or milestone is marked complete. This resumed turn made
-progress on publication/setup; the remaining authentication/live-evidence blocker
-is freshly observed. The previous blocked durable goal is not marked complete.
+Have a non-collaborator open issue #5 using the synthetic fixture in docs/m0/RUNBOOK.md;
+approve its protected job. Then inspect redacted M0 evidence and full-run privacy, and
+obtain the owner's personal Max billing/lifecycle attestations. The prompt explicitly
+requires the non-collaborator trigger; do not substitute an owner-triggered run and
+claim M0 passed. Authentication is reported configured but not yet tested.
 
 After M0 passes, resume preflight/admission reservation accounting and M2 wiring,
 followed by real M1/M2 acceptance, evaluation/shadow/write rollout, operations/cutover.
@@ -93,8 +105,8 @@ An actual M0 control failure requires architectural review, not a weakened check
 
 - Only the owner confirms personal Max identity, generates/stores OAuth outside
   Codex, attests billing attribution and records rotation/expiry without token value.
-- Publishing was authorized and completed. Protected environment configured; M0
-  remains disabled pending owner authentication. No secret was accessed or modified.
+- Publishing was authorized and completed. Protected environment configured; The single-fixture M0 gate
+  is now armed at the owner's request; its non-collaborator trigger is pending. No secret was accessed or modified.
 - M1 GitHub dry-run and real issue acceptance, all M2 integration checks, adversarial
   evaluation plus real shadow observations, approved comment/type-label rollout,
   operational runbooks and safe cutover remain required. Priority stays advisory.
